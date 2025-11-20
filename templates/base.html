@@ -71,10 +71,12 @@
             
             <nav class="nav-menu">
                 
-                <!-- ================= ADMIN MENU ================= -->
                 {% if session.role == 'admin' %}
                     <a href="{{ url_for('admin_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_dashboard' }}">
                         <span>📊</span> <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('admin_features_bp.admin_terminals') }}" class="nav-item">
+                        <span>🏢</span> <span>Terminals</span>
                     </a>
                     
                     <a href="{{ url_for('add_employee_bp.add_employee_form') }}" class="nav-item {{ 'active' if request.endpoint == 'add_employee_bp.add_employee_form' }}">
@@ -86,18 +88,17 @@
                     <a href="{{ url_for('admin_features_bp.admin_incidents') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_incidents' }}">
                         <span>🚨</span> <span>Incidents</span>
                     </a>
-                    <!-- CHANGED: Maintenance -> Complaints -->
+
                     <a href="{{ url_for('admin_features_bp.admin_complaints') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_complaints' }}">
                         <span>⚠️</span> <span>Complaints</span>
                     </a>
-                    <a href="#" class="nav-item">
-                        <span>🤖</span> <span>AI Insights</span>
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                         <span>🤖</span> <span>AI Insights</span>
                     </a>
                     <a href="{{ url_for('admin_features_bp.admin_feedbacks') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_feedbacks' }}">
                         <span>💬</span> <span>Feedback</span>
                     </a>
 
-                <!-- ================= EMPLOYEE MENU ================= -->
                 {% elif session.role == 'employee' %}
                     <a href="{{ url_for('employee_bp.employee_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'employee_bp.employee_dashboard' }}">
                         <span>📊</span> <span>Dashboard</span>
@@ -109,6 +110,20 @@
                         <span>📄</span> <span>Upload Certificate</span>
                     </a>
                     
+                    {% if session.employee_category == 'non_technical' %}
+                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
+                        <div style="padding: 0 30px; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 5px;">
+                            Passenger Support
+                        </div>
+                        
+                        <a href="{{ url_for('admin_features_bp.admin_complaints') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_complaints' }}">
+                            <span>⚠️</span> <span>Complaints</span>
+                        </a>
+                        <a href="{{ url_for('admin_features_bp.admin_feedbacks') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_feedbacks' }}">
+                            <span>💬</span> <span>Feedback</span>
+                        </a>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
+                    {% endif %}
                     <a href="{{ url_for('employee_bp.my_incidents') }}" class="nav-item {{ 'active' if request.endpoint == 'employee_bp.my_incidents' }}">
                         <span>📋</span> <span>My Incidents</span>
                     </a>
@@ -116,7 +131,6 @@
                         <span>📜</span> <span>My Certificates</span>
                     </a>
 
-                <!-- ================= PASSENGER MENU ================= -->
                 {% elif session.role == 'passenger' %}
                     <a href="{{ url_for('passenger_bp.passenger_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'passenger_bp.passenger_dashboard' }}">
                         <span>📊</span> <span>Dashboard</span>
@@ -126,7 +140,6 @@
                     </a>
                 {% endif %}
 
-                <!-- Common Links -->
                 <a href="{{ url_for('profile') }}" class="nav-item {{ 'active' if request.endpoint == 'profile' }}">
                     <span>👤</span> <span>Profile</span>
                 </a>

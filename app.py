@@ -35,9 +35,7 @@ from admin_features import admin_features_bp
 app.register_blueprint(admin_features_bp)
 
 
-# ---------------------------------
-# Root route
-# ---------------------------------
+
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -49,7 +47,17 @@ def index():
         elif role == 'passenger':
             return redirect(url_for('passenger_dashboard'))
     # If not logged in, or no role, show landing
-    return render_template('landing.html') 
+    announcements = []
+    try:
+        res = supabase.table('announcements') \
+            .select('*') \
+            .order('created_at', desc=True) \
+            .limit(3) \
+            .execute()
+        announcements = res.data if res.data else []
+    except Exception as e:
+        print(f"Error fetching announcements: {e}")
+    return render_template('landing.html', announcements=announcements)
 
 @app.route('/api/live_map_data')
 def live_map_data():
@@ -68,9 +76,7 @@ def live_map_data():
 def live_map():
     return render_template("live_map.html")
 
-# ---------------------------------
-# Passenger registration
-# ---------------------------------
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -111,9 +117,7 @@ def register():
     return render_template("register.html")
 
 
-# ---------------------------------
-# Login
-# ---------------------------------
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -154,18 +158,14 @@ def login():
     return render_template('login.html')
 
 
-# ---------------------------------
-# Logout
-# ---------------------------------
+
 @app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out successfully', 'success')
     return redirect(url_for('index'))
 
-# ---------------------------------
-# PROFILE ROUTES (Consolidated Here)
-# ---------------------------------
+
 @app.route('/profile')
 @login_required(role='any') 
 def profile():
@@ -217,9 +217,7 @@ def change_password():
             flash("Password must be at least 6 characters.", "error")
             return redirect(url_for('profile'))
 
-        # Update password in Supabase Auth
-        # Note: This requires service_role key if modifying auth.users directly, 
-        # but here we might be assuming a custom user table or admin rights.
+
         attributes = {"password": new_password}
         try:
             supabase.auth.admin.update_user_by_id(session.get('user_id'), attributes)
@@ -258,30 +256,34 @@ def download_data():
         flash(f"Error downloading data: {e}", "error")
         return redirect(url_for('profile'))
 
-# ---------------------------------
-# Dashboards
-# ---------------------------------
+
 @app.route('/admin/dashboard')
 @login_required(role='admin')
 def admin_dashboard():
     try:
-        # Use .count() for cleaner count fetching
+        # 1. Fetch Counts
         total_users = supabase.table('users').select('id', count='exact').execute()
         employees = supabase.table('users').select('id', count='exact').eq('role', 'employee').execute()
         passengers = supabase.table('users').select('id', count='exact').eq('role', 'passenger').execute()
+        
+        # 2. Fetch Routes for the Announcement Modal
+        routes_res = supabase.table('routes').select('id, name').execute()
+        routes = routes_res.data if routes_res.data else []
 
+        # 3. Create Stats Dictionary (MUST be done before return)
         stats = {
             'total_users': total_users.count or 0,
             'employees': employees.count or 0,
             'passengers': passengers.count or 0,
         }
 
-        return render_template('admin_dashboard.html', stats=stats)
+        # 4. Return Template
+        return render_template('admin_dashboard.html', stats=stats, routes=routes)
+
     except Exception as e:
         flash(f'Error loading dashboard: {str(e)}', 'error')
-        return render_template('admin_dashboard.html', stats={})
-
-
+        # Return empty data to prevent template crash
+        return render_template('admin_dashboard.html', stats={}, routes=[])
 @app.route('/employee/dashboard')
 @login_required(role='employee')
 def employee_dashboard():

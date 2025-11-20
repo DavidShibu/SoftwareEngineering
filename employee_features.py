@@ -3,10 +3,9 @@ from supabase import create_client, Client
 from datetime import datetime
 import uuid
 import os
-import fitz  # PyMuPDF for PDF metadata extraction
+import fitz  
 import re
 
-# Import the shared decorator
 from decorators import login_required
 
 employee_bp = Blueprint('employee_bp', __name__)
@@ -55,9 +54,6 @@ def format_datetime(value, format='%Y-%m-%d %H:%M'):
 
 employee_bp.app_template_filter('datetime_format')(format_datetime)
 
-# ---------------------------------------------------------------------------------------------------
-## Employee Dashboard
-# ---------------------------------------------------------------------------------------------------
 
 @employee_bp.route('/dashboard')
 @login_required(role='employee')
@@ -67,8 +63,7 @@ def employee_dashboard():
     
     tasks = []
     try:
-        # Fetch incidents assigned to this user that are NOT Closed
-        # We join 'users' to get the reporter's name if needed
+
         response = supabase.table('accidents') \
             .select('*, users:reported_by_id(full_name)') \
             .eq('assigned_to_id', user_id) \
@@ -83,14 +78,11 @@ def employee_dashboard():
 
     return render_template('er.html', category=category, tasks=tasks)
 
-# ---------------------------------------------------------------------------------------------------
-## Certificate Management
-# ---------------------------------------------------------------------------------------------------
 
 @employee_bp.route('/upload_certificate', methods=['GET', 'POST'])
 @login_required(role='employee')
 def upload_certificate():
-    # 1. AJAX Analysis
+
     if request.method == 'POST' and 'file_for_analysis' in request.files:
         file = request.files['file_for_analysis']
         if file.filename:
@@ -109,7 +101,6 @@ def upload_certificate():
             
             return jsonify({'certificate_name': initial_name, 'expiry_date': initial_expiry_date or ''})
 
-    # 2. Final Submission
     if request.method == 'POST':
         try:
             user_id = session.get('user_id')
@@ -131,7 +122,7 @@ def upload_certificate():
             
             if file and file.filename:
                 file_ext = os.path.splitext(file.filename)[1]
-                # CHANGED: Removed user_id subfolder. Saving to root of bucket.
+               
                 storage_file_name = f"cert_{uuid.uuid4()}{file_ext}"
                 
                 file.seek(0)
@@ -186,9 +177,6 @@ def my_certificates():
 
     return render_template('my_certificates.html', certificates=certificates)
 
-# ---------------------------------------------------------------------------------------------------
-## Accidents / Incidents
-# ---------------------------------------------------------------------------------------------------
 
 @employee_bp.route('/report_incident', methods=['GET', 'POST'])
 @login_required(role='employee')
@@ -210,7 +198,6 @@ def report_incident():
                 flash("Subject, Description, and Time are required.", "error")
                 return redirect(url_for('employee_bp.report_incident'))
 
-            # 2. Handle File Upload (Single file per your schema image)
             file_name = None
             file_url = None
             
@@ -233,7 +220,6 @@ def report_incident():
                 
                 file_name = file.filename
 
-            # 3. Insert into Database (Matches your Schema Image)
             accident_entry = {
                 "reported_by_id": user_id,
                 "terminal_id": "2e728c0f-ae27-4830-b5f7-139bfd0784ab", # Ensure this is a valid UUID in your DB
@@ -273,10 +259,6 @@ def my_incidents():
         flash(f"Error loading incident history: {e}", "error")
 
     return render_template('my_incidents.html', incidents=incidents)
-
-# ---------------------------------------------------------------------------------------------------
-## Repairs
-# ---------------------------------------------------------------------------------------------------
 
 @employee_bp.route('/upload_repair', methods=['POST'])
 @login_required(role='employee')
@@ -325,3 +307,35 @@ def upload_repair():
     except Exception as e:
         flash(f"Error submitting repair report: {e}", "error")
         return redirect(url_for('employee_bp.employee_dashboard'))
+# --- ADD THIS TO employee_features.py ---
+
+@employee_bp.route('/resolve_incident/<incident_id>', methods=['POST'])
+@login_required(role='employee')
+def resolve_incident(incident_id):
+    try:
+        resolution_notes = request.form.get('resolution_notes')
+        
+        # 1. Get current narrative
+        current_data = supabase.table('accidents').select('narrative').eq('id', incident_id).single().execute()
+        current_narrative = current_data.data.get('narrative', '') or ''
+        
+        # 2. Create timestamped log
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        user_name = session.get('full_name', 'Employee')
+        
+        new_log = f"\n\n[RESOLVED]: Marked as Resolved by {user_name} on {timestamp}.\nAction Taken: {resolution_notes}"
+        updated_narrative = current_narrative + new_log
+
+        # 3. Update the database
+        supabase.table('accidents').update({
+            'status': 'Resolved',
+            'narrative': updated_narrative
+        }).eq('id', incident_id).execute()
+
+        flash("Task marked as resolved.", "success")
+        
+    except Exception as e:
+        flash(f"Error updating task: {e}", "error")
+
+    # Redirect back to the dashboard
+    return redirect(url_for('employee_bp.employee_dashboard'))

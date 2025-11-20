@@ -5,19 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WAVELINK - Terminal Management System</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        /* --- Existing Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0a4d68 0%, #088395 50%, #05bfdb 100%);
             min-height: 100vh;
             color: white;
         }
-        
         .navbar {
             background: rgba(0, 0, 0, 0.3);
             padding: 20px 50px;
@@ -26,152 +21,83 @@
             align-items: center;
             backdrop-filter: blur(10px);
         }
+        .logo { font-size: 28px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: white; text-decoration: none; padding: 10px 25px; border-radius: 25px; transition: all 0.3s; font-weight: 500; }
+        .nav-links a:hover { background: rgba(255, 255, 255, 0.2); }
+        .btn-primary { background: #00d9ff; color: #0a4d68; font-weight: bold; }
+        .btn-primary:hover { background: #00c4e6; transform: translateY(-2px); }
         
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
+        .hero { text-align: center; padding: 100px 20px 60px 20px; max-width: 1200px; margin: 0 auto; }
+        .hero h1 { font-size: 64px; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .hero p { font-size: 24px; margin-bottom: 40px; opacity: 0.9; }
+        
+        .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .cta-btn { padding: 18px 40px; font-size: 18px; border: none; border-radius: 30px; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; font-weight: 600; }
+        .cta-btn.primary { background: white; color: #0a4d68; }
+        .cta-btn.secondary { background: transparent; color: white; border: 2px solid white; }
+        .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+        /* --- NEW: Announcement/Alert Styles --- */
+        .announcements-container {
+            max-width: 900px;
+            margin: 0 auto 60px auto;
+            padding: 0 20px;
+        }
+        .announcement-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 6px solid #d9534f; /* Red alert color */
+            border-radius: 8px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .announcement-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #c9302c;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 25px;
-            border-radius: 25px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .btn-primary {
-            background: #00d9ff;
-            color: #0a4d68;
-            font-weight: bold;
-        }
-        
-        .btn-primary:hover {
-            background: #00c4e6;
-            transform: translateY(-2px);
-        }
-        
-        .hero {
-            text-align: center;
-            padding: 100px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .hero h1 {
-            font-size: 64px;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .hero p {
-            font-size: 24px;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-        
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .cta-btn {
-            padding: 18px 40px;
-            font-size: 18px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
+        .announcement-date {
+            font-size: 12px;
+            color: #666;
             font-weight: 600;
         }
-        
-        .cta-btn.primary {
-            background: white;
-            color: #0a4d68;
+        .announcement-details {
+            font-size: 14px;
+            color: #555;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
         }
-        
-        .cta-btn.secondary {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-        
-        .cta-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            padding: 80px 50px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        .feature-card h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        
-        .feature-card p {
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-        
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%23ffffff" opacity="0.1"/></svg>');
-            background-size: cover;
-        }
+
+        /* --- Existing Feature Styles --- */
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 80px 50px; max-width: 1200px; margin: 0 auto; }
+        .feature-card { background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 15px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-10px); background: rgba(255, 255, 255, 0.15); }
+        .feature-icon { font-size: 48px; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 24px; margin-bottom: 15px; }
+        .feature-card p { opacity: 0.9; line-height: 1.6; }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">
-            🌊 WAVELINK
-        </div>
+        <div class="logo">🌊 WAVELINK</div>
         <div class="nav-links">
             <a href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('register') }}" class="btn-primary">Get Started</a>
@@ -186,42 +112,65 @@
             <a href="{{ url_for('login') }}" class="cta-btn secondary">Sign In</a>
         </div>
         <div class="cta-buttons" style="margin-top: 20px;">
-    <a href="{{ url_for('live_map') }}" class="cta-btn primary">View Live Map</a>
-</div>
-
+            <a href="{{ url_for('live_map') }}" class="cta-btn primary">View Live Map</a>
+        </div>
     </div>
-    
+
+    {% if announcements %}
+    <div class="announcements-container">
+        <h3 style="text-align: center; margin-bottom: 20px; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">
+            📢 Service Alerts
+        </h3>
+        
+        {% for alert in announcements %}
+        <div class="announcement-card">
+            <div class="announcement-header">
+                <div class="announcement-title">
+                    <span>⚠️</span> {{ alert.message }}
+                </div>
+                <div class="announcement-date">
+                    {{ alert.created_at[:10] }}
+                </div>
+            </div>
+            
+            <div class="announcement-details">
+                <div style="margin-bottom: 4px;">
+                    <strong>🚫 Affected Routes:</strong> {{ alert.affected_routes or 'All Routes' }}
+                </div>
+                <div>
+                    <strong>⏰ Time Slots:</strong> {{ alert.affected_times or 'All Day' }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="features">
         <div class="feature-card">
             <div class="feature-icon">🧑‍💼</div>
             <h3>Admin Control</h3>
             <p>Comprehensive terminal oversight, employee management, and AI-powered predictive analytics for optimal operations.</p>
         </div>
-        
         <div class="feature-card">
             <div class="feature-icon">👷</div>
             <h3>Employee Portal</h3>
             <p>Role-specific dashboards for technical staff, finance teams, and boat crews with real-time incident reporting.</p>
         </div>
-        
         <div class="feature-card">
             <div class="feature-icon">🧍</div>
             <h3>Passenger Services</h3>
             <p>Live ship tracking, safety updates, and easy feedback submission for a seamless travel experience.</p>
         </div>
-        
         <div class="feature-card">
             <div class="feature-icon">🚨</div>
             <h3>Emergency Response</h3>
             <p>Instant alerts, coordinated response systems, and real-time communication during critical situations.</p>
         </div>
-        
         <div class="feature-card">
             <div class="feature-icon">📊</div>
             <h3>Analytics & Reports</h3>
             <p>Data-driven insights, predictive maintenance, and comprehensive reporting for informed decision-making.</p>
         </div>
-        
         <div class="feature-card">
             <div class="feature-icon">🔒</div>
             <h3>Secure & Compliant</h3>

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.terminals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+.terminal-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    padding: 28px 18px 18px 18px;
+    transition: all 0.24s;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.terminal-card:hover {
+    box-shadow: 0 5px 18px rgba(8,131,149,0.2);
+    transform: translateY(-4px) scale(1.02);
+}
+.terminal-image {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 6px #08839522;
+    border: 2px solid #e4f4fb;
+}
+.terminal-title {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #088395;
+    margin-bottom: 8px;
+}
+.terminal-details {
+    margin-top: 18px;
+    background: #f7fcfd;
+    padding: 15px 12px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #0a4d68;
+    font-size: 1em;
+}
+</style>
+
+<h2 style="margin-top:18px;color:#0a4d68;font-size:2rem;">Terminals</h2>
+
+<div class="terminals-grid">
+    {% for term in terminals %}
+    <div class="terminal-card">
+        <img src="{{ term.image }}" class="terminal-image" alt="{{ term.name }} Station Image">
+        <div class="terminal-title">{{ term.name }}</div>
+        <div class="terminal-details">
+            <b>Employees:</b> {{ term.employees }}<br>
+            <b>Pontoons Active & Working:</b> {{ term.pontoons_active }}<br>
+            <b>Pontoons Inactive/Not Working:</b> {{ term.pontoons_inactive }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+<script>
+const terminalData = {{ terminals | tojson | safe }};
+function showTerminalDetails(tid) {
+    // Hide all details, show all summaries
+    terminalData.forEach(function(term) {
+        document.getElementById("details-" + term.id).style.display = "none";
+        document.getElementById("summary-" + term.id).style.display = "block";
+    });
+    // Show details for selected
+    var term = terminalData.find(function(t){ return t.id === tid; });
+    if (term) {
+        document.getElementById("summary-" + tid).style.display = "none";
+        document.getElementById("details-" + tid).style.display = "block";
+        document.getElementById("details-" + tid).innerHTML = `
+            <b>Employees:</b> ${term.employees}<br>
+            <b>Pontoons Active & Working:</b> ${term.pontoons_active}<br>
+            <b>Pontoons Inactive/Not Working:</b> ${term.pontoons_inactive}
+        `;
+    }
+}
+</script>
+{%endblock%}

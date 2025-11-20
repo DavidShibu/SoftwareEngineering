@@ -110,9 +110,25 @@
         color: white;
         font-weight: bold;
     }
+    
+    /* Loader Animation */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(8, 131, 149, 0.3);
+        border-radius: 50%;
+        border-top-color: #088395;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+        vertical-align: middle;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
 
-<!-- Top Bar -->
 <div class="top-bar">
     <h1>Welcome back, {{ session.full_name }}!</h1>
     <div class="user-info">
@@ -126,7 +142,6 @@
     </div>
 </div>
 
-<!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         <div style="margin-bottom: 20px;">
@@ -137,7 +152,6 @@
     {% endif %}
 {% endwith %}
 
-<!-- Stats Cards -->
 <div class="stats-grid">
     <div class="stat-card blue">
         <div class="stat-icon">👥</div>
@@ -164,7 +178,6 @@
     </div>
 </div>
 
-<!-- Quick Actions -->
 <div class="content-section">
     <div class="section-header">
         <h2>Quick Actions</h2>
@@ -175,63 +188,25 @@
             <span class="icon">👤</span>
             <h3>Add Employee</h3>
         </a>
-        
-        
-        
-        
-        
+        <div class="action-card" onclick="showAnnouncementModal()" style="cursor: pointer;">
+            <span class="icon">📢</span>
+            <h3>Make Announcement</h3>
+        </div>
+        <a href="{{ url_for('admin_features_bp.admin_reports') }}" class="action-card">
+            <span class="icon">📊</span>
+            <h3>View Reports</h3>
+        </a>
+
         <div class="action-card" onclick="showAIModal()" style="cursor: pointer;">
             <span class="icon">🤖</span>
             <h3>AI Recommendations</h3>
         </div>
-        
     </div>
 </div>
-<script>
-function runAIAnalysis() {
-    var loc = document.getElementById('ai_location').value.trim();
-    if(!loc) { alert("Enter a location name!"); return; }
 
-    document.getElementById('ai_loader').style.display = 'block';
-    document.getElementById('ai_result').innerHTML = "";
-
-    fetch("/admin/ai_recommendations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location: loc })
-    })
-    .then(r=>r.json())
-    .then(data=>{
-        document.getElementById('ai_loader').style.display = 'none';
-        if (data.error) {
-            document.getElementById('ai_result').innerHTML = "<div style='color:red'>" + data.error + "</div>";
-        } else {
-            document.getElementById('ai_result').innerHTML = aiRecommendationCard(data);
-        }
-    });
-}
-function aiRecommendationCard(reco) {
-    let riskColor = { "High": "#4caf50", "Medium": "#ff9800", "Low": "#e53935" }[reco.suitability] || "#888";
-    return `
-        <div style="background:#041f4a22;border-radius:16px;padding:24px;margin-top:16px">
-            <h3 style="color:#0a4d68;margin:0 0 10px 0">${reco.location || "-"}</h3>
-            <div style="display:inline-block;padding:7px 18px;background:${riskColor}22;color:${riskColor};border-radius:999px;font-weight:bold;">
-                Suitability: ${reco.suitability || "-"}
-            </div>
-            <div style="margin-top:21px;color:#1b2431;"><b>Pros:</b> <ul>${(reco.pros||[]).map(p=><li>${p}</li>).join('')}</ul></div>
-            <div style="color:#1b2431;"><b>Cons:</b> <ul>${(reco.cons||[]).map(c=><li>${c}</li>).join('')}</ul></div>
-            <div style="margin-top:17px; color:#085;">
-                <b>Recommendation:</b><br>
-                <span>${reco.finalRecommendation || "-"}</span>
-            </div>
-        </div>
-    `;
-}
-</script>
-<!-- AI Modal -->
 <div id="ai-modal" style="
-    display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;
-    background:rgba(24,36,46,0.18);align-items:center;justify-content:center;
+    display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2000;
+    background:rgba(24,36,46,0.4); align-items:center; justify-content:center; backdrop-filter: blur(4px);
 ">
   <div style="
       background:white;
@@ -247,7 +222,6 @@ function aiRecommendationCard(reco) {
       margin:auto;
   ">
 
-    <!-- Close button (top right for modal) -->
     <button onclick="hideAIModal()"
         style="position:absolute;top:14px;right:22px;font-size:26px;background:none;border:none;cursor:pointer;color:#0a4d68;font-weight:700;">&times;</button>
 
@@ -257,6 +231,7 @@ function aiRecommendationCard(reco) {
 
     <input type="text" id="ai_location" placeholder="Enter location (e.g., Aluva)"
         style="padding:13px 9px;width:93%;margin-bottom:14px;border-radius:8px;border:1.3px solid #ddd;display:block;margin:auto;" />
+    
     <button onclick="runAIAnalysis()"
     style="
         padding: 8px 24px;
@@ -275,17 +250,14 @@ function aiRecommendationCard(reco) {
         transition: background 0.2s;
     ">
     Run Analysis
-</button>
+    </button>
 
-
-    <div id="ai_loader" style="margin:14px 0 12px 0; display:none;font-size:18px;text-align:center;">
+    <div id="ai_loader" style="margin:14px 0 12px 0; display:none;font-size:18px;text-align:center; color: #088395;">
       Analyzing... <span class="loading-spinner"></span>
     </div>
 
-    <!-- The result will be injected here -->
     <div id="ai_result" style="margin-top: 8px;"></div>
 
-    <!-- Bottom close button (always visible after result) -->
     <button onclick="hideAIModal()"
       style="margin:16px auto 0 auto;display:block;background:#e0e0e0;color:#0a4d68;
              border:none;border-radius:8px;padding:10px 32px;font-weight:600;font-size:1.1em;cursor:pointer;">
@@ -294,63 +266,266 @@ function aiRecommendationCard(reco) {
   </div>
 </div>
 
-
 <script>
-function showAIModal() {
-    document.getElementById('ai-modal').style.display='flex';
-    document.getElementById('ai_location').value = '';
-    document.getElementById('ai_result').innerHTML = ''
-}
-function hideAIModal() {
-    document.getElementById('ai-modal').style.display='none';
-}
-function runAIAnalysis() {
-    var loc = document.getElementById('ai_location').value.trim();
-    if(!loc) { alert("Enter a location name!"); return; }
-    document.getElementById('ai_loader').style.display = 'block';
-    document.getElementById('ai_result').innerHTML = "";
-    fetch("/admin/ai_recommendations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location: loc })
-    })
-    .then(r=>r.json())
-    .then(data=>{
-        document.getElementById('ai_loader').style.display = 'none';
-        if (data.error) {
-            document.getElementById('ai_result').innerHTML = "<div style='color:red;word-break:break-all;'>" + data.error + "</div>";
-        } else {
-            document.getElementById('ai_result').innerHTML = aiRecommendationCard(data);
-        }
-    });
-}
-function aiRecommendationCard(data) {
-    let riskColor = { "High": "#4caf50", "Medium": "#ff9800", "Low": "#e53935" }[data.suitability] || "#888";
-    return `
-        <div style="background:#f5fcff;border-radius:20px;padding:30px 28px;max-width:480px;margin:30px auto 0 auto;">
-            <div style="font-size:1.5em;font-weight:700;color:#175d7b;margin-bottom:10px;">
-                ${data.location || "-"}
+    function showAIModal() {
+        document.getElementById('ai-modal').style.display='flex';
+        // Focus on the input
+        setTimeout(() => document.getElementById('ai_location').focus(), 100);
+    }
+
+    function hideAIModal() {
+        document.getElementById('ai-modal').style.display='none';
+        // Optional: Clear results on close
+        // document.getElementById('ai_result').innerHTML = '';
+        // document.getElementById('ai_location').value = '';
+    }
+
+    function runAIAnalysis() {
+        var loc = document.getElementById('ai_location').value.trim();
+        if(!loc) { alert("Enter a location name!"); return; }
+        
+        document.getElementById('ai_loader').style.display = 'block';
+        document.getElementById('ai_result').innerHTML = "";
+        
+        fetch("/admin/ai_recommendations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ location: loc })
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('ai_loader').style.display = 'none';
+            if (data.error) {
+                document.getElementById('ai_result').innerHTML = "<div style='color:red; text-align:center; padding:10px;'>" + data.error + "</div>";
+            } else {
+                document.getElementById('ai_result').innerHTML = aiRecommendationCard(data);
+            }
+        })
+        .catch(err => {
+            document.getElementById('ai_loader').style.display = 'none';
+            document.getElementById('ai_result').innerHTML = "<div style='color:red; text-align:center;'>Network Error. Please try again.</div>";
+        });
+    }
+
+    function aiRecommendationCard(data) {
+        // Logic to pick color based on suitability
+        let riskColor = "#888";
+        if (data.suitability === "High") riskColor = "#4caf50"; // Green
+        else if (data.suitability === "Medium") riskColor = "#ff9800"; // Orange
+        else if (data.suitability === "Low") riskColor = "#e53935"; // Red
+
+        return `
+            <div style="background:#f5fcff; border-radius:12px; padding:20px; border: 1px solid #e0e0e0;">
+                <div style="font-size:1.3em; font-weight:700; color:#0a4d68; margin-bottom:10px; text-align:center;">
+                    ${data.location || "Unknown Location"}
+                </div>
+                
+                <div style="text-align:center; margin-bottom:20px;">
+                    <span style="display:inline-block; padding:6px 16px; font-weight:700; background:${riskColor}22; color:${riskColor}; border-radius:20px; border:1px solid ${riskColor}; font-size:0.9em;">
+                        Suitability: ${data.suitability || "Unknown"}
+                    </span>
+                </div>
+                
+                ${data.description ? 
+                    `<div style="margin-bottom:14px; color:#333; font-size:0.95em; line-height:1.5;">
+                        <strong style="color:#088395;">Description:</strong> ${data.description}
+                    </div>` 
+                    : ""}
+                
+                ${data.reasoning ? 
+                    `<div style="margin-bottom:14px; color:#333; font-size:0.95em; line-height:1.5;">
+                        <strong style="color:#088395;">Reasoning:</strong> ${data.reasoning}
+                    </div>`
+                    : ""}
+                
+                <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ccc;">
+                    <div style="font-weight:700; color:#0a4d68; font-size:1em; margin-bottom:5px;">
+                        Final Recommendation:
+                    </div>
+                    <div style="color:#333; font-style:italic;">
+                        ${data.finalRecommendation || "-"}
+                    </div>
+                </div>
             </div>
-            <div style="margin-bottom:20px;">
-                <span style="display:inline-block;padding:10px 26px;font-weight:700;background:${riskColor}22;color:${riskColor};border-radius:20px;font-size:1em;">
-                    Suitability: ${data.suitability || "-"}
-                </span>
-            </div>
-            ${data.description && data.description !== "(No information provided by AI)" ? 
-                <div style="margin-bottom:14px;color:#085;font-size:1em;"><b>Description:</b> ${data.description}</div> 
-                : ""}
-            ${data.reasoning && data.reasoning !== "(No information provided by AI)" ? 
-                <div style="margin-bottom:18px;color:#0b4263;font-size:1em;"><b>Reasoning:</b> ${data.reasoning}</div>
-                : ""}
-            <div style="margin-top:10px;font-weight:700;color:#097d4c;font-size:1.1em;">
-                Recommendation:
-            </div>
-            <div style="color:#097d4c;font-size:1.1em;">
-                ${data.finalRecommendation || "-"}
+        `;
+    }
+</script>
+<div id="announcement-modal" style="
+    display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2000;
+    background:rgba(24,36,46,0.5); align-items:center; justify-content:center; backdrop-filter: blur(4px);
+">
+  <div style="
+      background:white; padding:30px; border-radius:18px; max-width:500px; width:90%;
+      box-shadow:0 10px 40px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto; position:relative;
+  ">
+    <button onclick="hideAnnouncementModal()" style="position:absolute;top:15px;right:20px;background:none;border:none;font-size:24px;cursor:pointer;">&times;</button>
+    
+    <h2 style="color:#0a4d68; margin-bottom:20px; text-align:center;">📢 Send Route Alert</h2>
+
+    <form action="{{ url_for('admin_features_bp.send_announcement') }}" method="POST">
+        
+        <div class="form-group" style="margin-bottom:15px;">
+            <label style="font-weight:600; display:block; margin-bottom:5px;">Select Routes (Hold Ctrl/Cmd to select multiple)</label>
+            <select name="route_ids" multiple required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; height:120px;">
+                {% for route in routes %}
+                    <option value="{{ route.id }}">{{ route.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:15px;">
+            <label style="font-weight:600; display:block; margin-bottom:5px;">Affected Time Periods</label>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; max-height:100px; overflow-y:auto; padding:5px; border:1px solid #eee;">
+                {% for hour in range(6, 22) %}
+                    {% for minute in ['00', '30'] %}
+                        <label style="background:#f1f3f5; padding:5px 10px; border-radius:15px; font-size:12px; cursor:pointer;">
+                            <input type="checkbox" name="time_slots" value="{{ '%02d:%s' % (hour, minute) }}"> 
+                            {{ '%02d:%s' % (hour, minute) }}
+                        </label>
+                    {% endfor %}
+                {% endfor %}
             </div>
         </div>
-    `;
-}
 
+        <div class="form-group" style="margin-bottom:20px;">
+            <label style="font-weight:600; display:block; margin-bottom:5px;">Message</label>
+            <textarea name="message" rows="3" required placeholder="e.g., Route delayed by 20 mins due to heavy rain."
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-family:inherit;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width:100%;">Send SMS Alert</button>
+    </form>
+  </div>
+</div>
+
+<script>
+    function showAnnouncementModal() {
+        document.getElementById('announcement-modal').style.display = 'flex';
+    }
+    function hideAnnouncementModal() {
+        document.getElementById('announcement-modal').style.display = 'none';
+    }
+</script>
+<div onclick="toggleChat()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:#0a4d68; border-radius:50%; box-shadow:0 4px 15px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:9999; transition: transform 0.2s;">
+    <span style="font-size:30px;">🤖</span>
+</div>
+
+<div id="chat-window" style="display:none; position:fixed; bottom:100px; right:30px; width:380px; height:500px; background:white; border-radius:15px; box-shadow:0 5px 25px rgba(0,0,0,0.2); z-index:9999; flex-direction:column; overflow:hidden;">
+    
+    <div style="background:#0a4d68; color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between;">
+        <span>Admin AI Agent</span>
+        <span onclick="toggleChat()" style="cursor:pointer;">&times;</span>
+    </div>
+
+    <div id="chat-messages" style="flex:1; padding:15px; overflow-y:auto; background:#f8f9fa;">
+        <div style="background:#e9ecef; padding:10px; border-radius:10px; margin-bottom:10px; max-width:80%;">
+            Hello! Ask me to find documents, like "Show pending certificates" or "Critical accidents".
+        </div>
+    </div>
+
+    <div style="padding:10px; border-top:1px solid #ddd; display:flex; gap:10px;">
+        <input type="text" id="chat-input" placeholder="Type your request..." style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+        <button onclick="sendChat()" style="background:#088395; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">➤</button>
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        win.style.display = (win.style.display === 'none') ? 'flex' : 'none';
+    }
+
+    function sendChat() {
+        const input = document.getElementById('chat-input');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        // 1. Add User Message
+        addMessage(msg, 'user');
+        input.value = '';
+
+        // 2. Call Backend
+        fetch('/admin/ai_chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: msg })
+        })
+        .then(r => r.json())
+        .then(data => {
+            // 3. Add Bot Text
+            addMessage(data.text, 'bot');
+
+            // 4. Render Data Cards with FILES
+            if (data.data && data.data.length > 0) {
+                renderDataCards(data.data);
+            }
+        });
+    }
+
+    function addMessage(text, sender) {
+        const div = document.createElement('div');
+        div.style.padding = '10px';
+        div.style.borderRadius = '10px';
+        div.style.marginBottom = '10px';
+        div.style.maxWidth = '80%';
+        div.style.wordWrap = 'break-word';
+
+        if (sender === 'user') {
+            div.style.background = '#0a4d68';
+            div.style.color = 'white';
+            div.style.alignSelf = 'flex-end';
+            div.style.marginLeft = 'auto';
+        } else {
+            div.style.background = '#e9ecef';
+            div.style.color = '#333';
+        }
+
+        div.innerText = text;
+        document.getElementById('chat-messages').appendChild(div);
+        scrollToBottom();
+    }
+
+    function renderDataCards(items) {
+        const container = document.getElementById('chat-messages');
+        
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.style.background = 'white';
+            card.style.border = '1px solid #ddd';
+            card.style.borderRadius = '8px';
+            card.style.padding = '10px';
+            card.style.marginBottom = '8px';
+            card.style.fontSize = '0.9em';
+            card.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
+
+            // Determine Title based on data type
+            let title = item.certificate_name || item.subject || "Unknown Record";
+            let sub = item.users ? item.users.full_name : (item.expiry_date || item.accident_time || "");
+
+            let html = `<strong>${title}</strong><br><span style="color:#666;">${sub}</span>`;
+
+            // --- THE MAGIC: RENDER FILE LINK ---
+            if (item.file_url) {
+                html += `
+                <div style="margin-top:8px;">
+                    <a href="${item.file_url}" target="_blank" style="
+                        display:block; text-align:center; background:#fff3cd; 
+                        color:#856404; text-decoration:none; padding:6px; 
+                        border-radius:4px; font-weight:bold; border:1px solid #ffeeba;">
+                        📄 Open File ↗
+                    </a>
+                </div>`;
+            }
+
+            card.innerHTML = html;
+            container.appendChild(card);
+        });
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        const chatDiv = document.getElementById('chat-messages');
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
 </script>
 {% endblock %}

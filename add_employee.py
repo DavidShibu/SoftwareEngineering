@@ -14,10 +14,6 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-
-# ----------------------------------------------
-# Show Add Employee form AND List Existing Employees
-# ----------------------------------------------
 @add_employee_bp.route('/add_employee', methods=['GET'])
 @login_required(role='admin') 
 def add_employee_form():
@@ -26,9 +22,6 @@ def add_employee_form():
         terminals_res = supabase.table('terminals').select('*').execute()
         terminals = terminals_res.data if terminals_res.data else []
 
-        # 2. Fetch Existing Employees for the table below
-        # We use '*, terminals(name)' to join the tables and get the terminal name
-        # Note: This requires a Foreign Key link between users.terminal_id and terminals.id in Supabase
         employees_res = supabase.table('users') \
             .select('*') \
             .eq('role', 'employee') \

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin-top:20px;color:#0a4d68;">Analytics Reports</h2>
+
+<div style="display: grid; gap: 38px; grid-template-columns: 1fr 1fr; margin:32px 0;">
+    <div>
+        <h3>Employees per Terminal</h3>
+        <canvas id="empPerTerminalChart"></canvas>
+    </div>
+    <div>
+        <h3>Incidents per Terminal</h3>
+        <canvas id="incidentsPerTerminalChart"></canvas>
+    </div>
+    <div>
+        <h3>Pontoon Status (Active vs Inactive)</h3>
+        <canvas id="pontoonStatusPie"></canvas>
+    </div>
+    <div>
+        <h3>Incident Trend (Monthly)</h3>
+        <canvas id="monthlyIncidentChart"></canvas>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const chartData = {{ chart_data | tojson | safe }};
+
+// Employees per terminal (Bar - bars rise up)
+new Chart(document.getElementById('empPerTerminalChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(chartData.employee_per_terminal),
+        datasets: [{
+            label: 'Employees',
+            data: Object.values(chartData.employee_per_terminal),
+            backgroundColor: '#05bfdb'
+        }]
+    },
+    options: {
+        animation: {
+            duration: 1500,
+            easing: 'easeOutBounce'
+        }
+    }
+});
+
+// Incidents per terminal (Bar - bars bounce up)
+new Chart(document.getElementById('incidentsPerTerminalChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(chartData.incidents_per_terminal),
+        datasets: [{
+            label: 'Incidents',
+            data: Object.values(chartData.incidents_per_terminal),
+            backgroundColor: '#fd7e14'
+        }]
+    },
+    options: {
+        animation: {
+            duration: 1500,
+            easing: 'easeOutBounce'
+        }
+    }
+});
+
+// Pontoon status (Pie - slices sweep from zero)
+new Chart(document.getElementById('pontoonStatusPie'), {
+    type: 'pie',
+    data: {
+        labels: ['Active', 'Inactive'],
+        datasets: [{
+            data: [chartData.pontoons_active, chartData.pontoons_inactive],
+            backgroundColor: ['#4caf50','#e53935']
+        }]
+    },
+    options: {
+        animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 1600,
+            easing: 'easeOutQuart'
+        }
+    }
+});
+
+// Incident trend (Line - left-to-right sweep)
+new Chart(document.getElementById('monthlyIncidentChart'), {
+    type: 'line',
+    data: {
+        labels: Object.keys(chartData.incidents_monthly),
+        datasets: [{
+            label: 'Incidents',
+            data: Object.values(chartData.incidents_monthly),
+            borderColor: '#088395',
+            backgroundColor: 'rgba(8,131,149,0.12)',
+            fill: false,
+            tension: 0.2,
+            pointRadius: 3,
+            pointBackgroundColor: '#088395'
+        }]
+    },
+    options: {
+        animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart'
+        },
+        elements: {
+            line: { borderWidth: 3 }
+        }
+    }
+});
+</script>
+
+{%endblock%}

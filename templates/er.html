@@ -5,227 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Dashboard - WAVELINK</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-        }
+        .dashboard { display: flex; min-height: 100vh; }
         
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #088395, #05bfdb); color: white; padding: 30px 0; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidebar-header { padding: 0 30px 30px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .sidebar-header h2 { font-size: 24px; }
+        .sidebar-header p { font-size: 14px; opacity: 0.8; margin-top: 5px; }
         
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #088395, #05bfdb);
-            color: white;
-            padding: 30px 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
+        .nav-menu { padding: 20px 0; }
+        .nav-item { padding: 15px 30px; display: flex; align-items: center; gap: 15px; color: white; text-decoration: none; transition: all 0.3s; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid #ffeb3b; }
+        .nav-item span { font-size: 20px; }
         
-        .sidebar-header {
-            padding: 0 30px 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
+        .logout-btn { margin: 20px 30px; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s; }
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
         
-        .sidebar-header h2 {
-            font-size: 24px;
-        }
+        .main-content { flex: 1; margin-left: 260px; padding: 30px; }
         
-        .sidebar-header p {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
+        .top-bar { background: white; padding: 20px 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .top-bar h1 { color: #088395; }
         
-        .nav-menu {
-            padding: 20px 0;
-        }
+        .category-badge { display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #088395, #05bfdb); color: white; border-radius: 20px; font-size: 14px; font-weight: 600; margin-top: 10px; }
         
-        .nav-item {
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
+        .content-section { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { color: #088395; }
         
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            border-left: 4px solid #ffeb3b;
-        }
+        .btn { padding: 10px 20px; background: linear-gradient(135deg, #088395, #05bfdb); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; text-decoration: none; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(8, 131, 149, 0.3); }
         
-        .nav-item span {
-            font-size: 20px;
-        }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .action-card { padding: 25px; background: linear-gradient(135deg, rgba(8, 131, 149, 0.05), rgba(5, 191, 219, 0.05)); border: 2px solid rgba(8, 131, 149, 0.1); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; text-decoration: none; }
+        .action-card:hover { transform: translateY(-3px); border-color: #088395; }
+        .action-card .icon { font-size: 40px; margin-bottom: 10px; color: #088395; }
+        .action-card h3 { color: #088395; font-size: 16px; }
         
-        .logout-btn {
-            margin: 20px 30px;
-            padding: 12px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            padding: 30px;
-        }
-        
-        .top-bar {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .top-bar h1 {
-            color: #088395;
-        }
-        
-        .category-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #088395, #05bfdb);
-            color: white;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        
-        .content-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .section-header h2 {
-            color: #088395;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #088395, #05bfdb);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(8, 131, 149, 0.3);
-        }
-        
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        
-        .action-card {
-            padding: 25px;
-            background: linear-gradient(135deg, rgba(8, 131, 149, 0.05), rgba(5, 191, 219, 0.05));
-            border: 2px solid rgba(8, 131, 149, 0.1);
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        
-        .action-card:hover {
-            transform: translateY(-3px);
-            border-color: #088395;
-        }
-        
-        .action-card .icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            color: #088395;
-        }
-        
-        .action-card h3 {
-            color: #088395;
-            font-size: 16px;
-        }
-        
-        .task-list {
-            list-style: none;
-        }
-        
-        .task-item {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .task-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .task-date {
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .task-status {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
-        }
+        .task-list { list-style: none; }
+        .task-item { padding: 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px; display: block; }
+        .task-title { font-weight: 600; color: #333; margin-bottom: 5px; }
+        .task-date { font-size: 14px; color: #666; }
+        .task-status { padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-completed { background: #d4edda; color: #155724; }
     </style>
 </head>
 <body>
@@ -236,57 +60,45 @@
                 <p>Employee Portal</p>
             </div>
             
-            <!-- --- NEW: ROLE-AWARE SIDEBAR --- -->
             <nav class="nav-menu">
                 <a href="{{ url_for('employee_bp.employee_dashboard') }}" class="nav-item active">
-                    <span>📊</span>
-                    <span>Dashboard</span>
+                    <span>📊</span> <span>Dashboard</span>
                 </a>
                 
-                <!-- Common Links -->
                 <a href="{{ url_for('employee_bp.report_incident') }}" class="nav-item">
-                    <span>📝</span>
-                    <span>Report Incident</span>
+                    <span>📝</span> <span>Report Incident</span>
                 </a>
                 <a href="{{ url_for('employee_bp.upload_certificate') }}" class="nav-item">
-                    <span>📄</span>
-                    <span>Upload Certificate</span>
+                    <span>📄</span> <span>Upload Certificate</span>
                 </a>
-                
 
-                <!-- Role-Specific Links -->
                 {% if category == 'technical' %}
-                    <a href="#" class="nav-item">
-                        <span>🔧</span>
-                        <span>Maintenance Log</span>
-                    </a>
+                    <a href="#" class="nav-item"><span>🔧</span> <span>Maintenance Log</span></a>
                 {% elif category == 'finance' %}
-                    <a href="#" class="nav-item">
-                        <span>💰</span>
-                        <span>Billing Reports</span>
-                    </a>
+                    <a href="#" class="nav-item"><span>💰</span> <span>Billing Reports</span></a>
                 {% elif category == 'boat_driver' %}
-                    <a href="#" class="nav-item">
-                        <span>🛥️</span>
-                        <span>Journey Log</span>
+                    <a href="#" class="nav-item"><span>🛥️</span> <span>Journey Log</span></a>
+                {% elif category == 'non_technical' %}
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
+                    <a href="{{ url_for('admin_features_bp.admin_complaints') }}" class="nav-item">
+                        <span>⚠️</span> <span>Complaints</span>
                     </a>
+                    <a href="{{ url_for('admin_features_bp.admin_feedbacks') }}" class="nav-item">
+                        <span>💬</span> <span>Feedback</span>
+                    </a>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
                 {% endif %}
 
-                <!-- Common History Links -->
                  <a href="{{ url_for('employee_bp.my_incidents') }}" class="nav-item">
-                    <span>📋</span>
-                    <span>My Incidents</span>
+                    <span>📋</span> <span>My Incidents</span>
                 </a>
                  <a href="{{ url_for('employee_bp.my_certificates') }}" class="nav-item">
-                    <span>📜</span>
-                    <span>My Certificates</span>
+                    <span>📜</span> <span>My Certificates</span>
                 </a>
                 <a href="{{ url_for('profile') }}" class="nav-item">
-                    <span>👤</span>
-                    <span>Profile</span>
+                    <span>👤</span> <span>Profile</span>
                 </a>
             </nav>
-            <!-- --- END ROLE-AWARE SIDEBAR --- -->
             
             <div class="logout-btn" onclick="window.location.href='{{ url_for('logout') }}'">
                 🚪 Logout
@@ -294,7 +106,6 @@
         </aside>
         
         <main class="main-content">
-            <!-- Flash Message Container -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -308,60 +119,46 @@
             <div class="top-bar">
                 <h1>Welcome, {{ session.full_name }}!</h1>
                 <div class="category-badge">
-                    {% if category == 'technical' %}
-                        🔧 Technical Staff
-                    {% elif category == 'non_technical' %}
-                        📋 Non-Technical Staff
-                    {% elif category == 'finance' %}
-                        💰 Finance Staff
-                    {% elif category == 'boat_driver' %}
-                        ⛴️ Boat Driver/Crew
-                    {% else %}
-                        👷 General Employee
-                    {% endif %}
+                    {% if category == 'technical' %} 🔧 Technical Staff
+                    {% elif category == 'non_technical' %} 📋 Non-Technical Staff
+                    {% elif category == 'finance' %} 💰 Finance Staff
+                    {% elif category == 'boat_driver' %} ⛴️ Boat Driver/Crew
+                    {% else %} 👷 General Employee {% endif %}
                 </div>
             </div>
             
-            <!-- --- NEW: ROLE-AWARE QUICK ACTIONS --- -->
             <div class="content-section">
                 <div class="section-header">
                     <h2>Quick Actions</h2>
                 </div>
-                
                 <div class="quick-actions">
-                    <!-- Common Actions -->
                     <a href="{{ url_for('employee_bp.report_incident') }}" class="action-card">
-                        <div class="icon">📝</div>
-                        <h3>Report Incident</h3>
+                        <div class="icon">📝</div> <h3>Report Incident</h3>
                     </a>
                     <a href="{{ url_for('employee_bp.upload_certificate') }}" class="action-card">
-                        <div class="icon">📄</div>
-                        <h3>Upload Certificate</h3>
+                        <div class="icon">📄</div> <h3>Upload Certificate</h3>
                     </a>
-                    
 
-                    <!-- Role-Specific Actions -->
                     {% if category == 'technical' %}
-                        <a href="#" class="action-card">
-                            <div class="icon">🔧</div>
-                            <h3>Log Maintenance</h3>
-                        </a>
+                        <a href="#" class="action-card"><div class="icon">🔧</div> <h3>Log Maintenance</h3></a>
                     {% elif category == 'finance' %}
-                        <a href="#" class="action-card">
-                            <div class="icon">💰</div>
-                            <h3>Upload Bill</h3>
-                        </a>
+                        <a href="#" class="action-card"><div class="icon">💰</div> <h3>Upload Bill</h3></a>
                     {% elif category == 'boat_driver' %}
-                        <a href="#" class="action-card">
-                            <div class="icon">🛥️</div>
-                            <h3>Start Journey Log</h3>
-                        </a>
+                        <a href="#" class="action-card"><div class="icon">🛥️</div> <h3>Start Journey Log</h3></a>
                     {% elif category == 'non_technical' %}
-                        
+                        <a href="{{ url_for('admin_features_bp.admin_complaints') }}" class="action-card">
+                            <div class="icon">⚠️</div> <h3>Complaints</h3>
+                        </a>
+                        <a href="{{ url_for('admin_features_bp.admin_feedbacks') }}" class="action-card">
+                            <div class="icon">💬</div> <h3>Feedbacks</h3>
+                        </a>
+                    {% else %}
+                        <a href="#" class="action-card" style="border-color: #d9534f; background: linear-gradient(135deg, rgba(217, 83, 79, 0.05), rgba(217, 83, 79, 0.1));">
+                            <div class="icon" style="color: #d9534f;">🚨</div> <h3 style="color: #d9534f;">Trigger Emergency</h3>
+                        </a>
                     {% endif %}
                 </div>
             </div>
-            <!-- --- END ROLE-AWARE QUICK ACTIONS --- -->
             
             <div class="content-section">
                 <div class="section-header">
@@ -373,34 +170,55 @@
                     <ul class="task-list">
                         {% for task in tasks %}
                             <li class="task-item" style="border-left: 4px solid {% if task.severity == 'Critical' %}#dc3545{% elif task.severity == 'Major' %}#fd7e14{% else %}#088395{% endif %};">
-                                <div style="flex: 1;">
-                                    <div class="task-title">{{ task.subject }}</div>
-                                    <div class="task-date">
-                                        Reported by: {{ task.users.full_name if task.users else 'Unknown' }} <br>
-                                        <span style="font-size: 0.9em;">📅 {{ task.accident_time | replace('T', ' ') }}</span>
-                                    </div>
-                                    
-                                    <div style="margin-top: 8px;">
-                                        {% if task.file_url %}
-                                            <a href="{{ task.file_url }}" target="_blank" style="font-size: 12px; color: #088395; text-decoration: none; margin-right: 10px;">
-                                                📎 View Evidence
-                                            </a>
-                                        {% endif %}
-                                        
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div>
+                                        <div class="task-title">{{ task.subject }}</div>
+                                        <div class="task-date">
+                                            Reported by: {{ task.users.full_name if task.users else 'Unknown' }} <br>
+                                            <span style="font-size: 0.9em;">📅 {{ task.accident_time | replace('T', ' ') }}</span>
                                         </div>
+                                    </div>
+
+                                    <div style="text-align: right;">
+                                        <span class="task-status 
+                                            {% if task.status == 'Resolved' %}status-completed
+                                            {% else %}status-pending{% endif %}">
+                                            {{ task.status }}
+                                        </span>
+                                        <br>
+                                        <small style="font-size: 10px; color: #999; display: block; margin-top: 5px;">
+                                            Priority: {{ task.severity }}
+                                        </small>
+                                    </div>
                                 </div>
 
-                                <div style="text-align: right;">
-                                    <span class="task-status 
-                                        {% if task.status == 'Assigned' %}status-pending
-                                        {% elif task.status == 'In Progress' %}status-pending
-                                        {% else %}status-completed{% endif %}">
-                                        {{ task.status }}
-                                    </span>
-                                    <br>
-                                    <small style="font-size: 10px; color: #999; display: block; margin-top: 5px;">
-                                        Priority: {{ task.severity }}
-                                    </small>
+                                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+                                    {% if task.file_url %}
+                                        <a href="{{ task.file_url }}" target="_blank" style="font-size: 12px; color: #088395; text-decoration: none; margin-right: 15px;">
+                                            📎 View Evidence
+                                        </a>
+                                    {% endif %}
+
+                                    {% if task.status != 'Resolved' %}
+                                        <details style="margin-top: 10px;">
+                                            <summary style="cursor: pointer; color: #28a745; font-size: 13px; font-weight: 600;">
+                                                ✅ Mark as Resolved
+                                            </summary>
+                                            <form action="{{ url_for('employee_bp.resolve_incident', incident_id=task.id) }}" method="POST" style="margin-top: 10px; background: #f1f1f1; padding: 10px; border-radius: 6px;">
+                                                <label style="display: block; font-size: 12px; color: #666; margin-bottom: 5px;">Action Taken / Resolution Notes:</label>
+                                                <textarea name="resolution_notes" required 
+                                                    style="width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 8px; font-family: inherit; font-size: 13px;" 
+                                                    rows="2" placeholder="e.g., Cleaned the spill, fixed the wiring..."></textarea>
+                                                <button type="submit" style="margin-top: 8px; background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                                    Submit Resolution
+                                                </button>
+                                            </form>
+                                        </details>
+                                    {% else %}
+                                        <span style="font-size: 12px; color: #28a745; font-style: italic; margin-left: 10px;">
+                                            Waiting for Admin to Close
+                                        </span>
+                                    {% endif %}
                                 </div>
                             </li>
                         {% endfor %}
@@ -412,8 +230,6 @@
                     </div>
                 {% endif %}
             </div>
-            
-            
         </main>
     </div>
 </body>

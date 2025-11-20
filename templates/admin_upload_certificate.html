@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="top-bar">
+    <h1>Upload Employee Certificate</h1>
+    <p style="color: #666;">Upload and verify a document for a staff member.</p>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="content-section" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST" enctype="multipart/form-data">
+        
+        <div class="form-group">
+            <label class="form-label">Select Employee</label>
+            <select name="employee_id" class="form-control" required>
+                <option value="" disabled selected>-- Choose Staff Member --</option>
+                {% for emp in employees %}
+                    <option value="{{ emp.id }}">{{ emp.full_name }} ({{ emp.employee_category }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Certificate Type</label>
+            <select name="cert_type" class="form-control" required>
+                <option value="" disabled selected>-- Select Type --</option>
+                <option value="Medical">Medical</option>
+                <option value="Safety">Safety</option>
+                <option value="License">License</option>
+                <option value="Technical">Technical</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Certificate Name</label>
+            <input type="text" name="cert_name" class="form-control" placeholder="e.g., Boat License, Safety Training" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Expiry Date (Optional)</label>
+            <input type="date" name="expiry_date" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Upload Document (PDF, JPG, PNG)</label>
+            <div class="file-drop-area" style="border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 8px; position: relative; background: #fafafa;">
+                <span class="file-msg">Click to choose file or drag here</span>
+                <input class="file-input" type="file" name="certificate_file" accept=".pdf,.jpg,.jpeg,.png" required 
+                    style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; opacity: 0; cursor: pointer;">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Upload & Verify</button>
+    </form>
+</div>
+
+<script>
+    const fileInput = document.querySelector('.file-input');
+    const fileMsg = document.querySelector('.file-msg');
+
+    fileInput.addEventListener('change', function() {
+        if (fileInput.files.length > 0) {
+            fileMsg.textContent = "Selected: " + fileInput.files[0].name;
+            fileMsg.style.color = "#0a4d68";
+            fileMsg.style.fontWeight = "bold";
+        }
+    });
+</script>
+{% endblock %}
