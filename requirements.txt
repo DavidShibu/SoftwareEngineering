@@ -1,7 +1,7 @@
-Flask==3.0.0
-supabase==2.3.0
-python-dotenv==1.0.0
-python-dateutil==2.8.2
-PyMuPDF==1.23.8
-Werkzeug==3.0.1
+Flask
+supabase
+python-dotenv
+python-dateutil
+PyMuPDF
+Werkzeug
 gunicorn
