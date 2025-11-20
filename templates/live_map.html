@@ -1,214 +1,188 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>Live Terminal Map (Mapbox)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet" />
-    <style>
-        body, html { height: 100%; margin: 0; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-        #legend {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: white; padding: 10px; border-radius: 8px;
-            z-index: 999;
-            font-size: 15px;
-        }
-        #searchbar {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            width: 280px;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #bbb;
-            font-size: 16px;
-        }
-        .boat-marker {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-
-    </style>
+  <meta charset="utf-8" />
+  <title>Live Terminal Map (Mapbox)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body, html { height: 100%; margin: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #legend {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: white; padding: 10px; border-radius: 8px;
+      z-index: 999;
+      font-size: 15px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.07);
+    }
+    #searchbar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      width: 280px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #bbb;
+      font-size: 16px;
+      background: white;
+    }
+    .boat-marker {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+  </style>
 </head>
 <body>
-<div id="map"></div>
-<div id="legend">
-  <b>Legend:</b><br>
-  <span style="color:green;">●</span> Terminal<br>
-  <span style="color:blue;">―</span> Route Line<br>
-</div>
-<input id="searchbar" type="text" placeholder="Search terminal or coordinates..." />
+  <div id="map"></div>
+  <div id="legend">
+    <b>Legend:</b><br>
+    <span style="color:green;">●</span> Terminal<br>
+    <span style="color:blue;">―</span> Route Line<br>
+  </div>
+  <input id="searchbar" type="text" placeholder="Search terminal or coordinates..." />
 
-<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2Jpc2FhYyIsImEiOiJjbWkxY3h5d2owcDJjMm1yNG05cjFtaW16In0.togZH3hSr6Nf2QFmnNZY9A'; // Replace with your token if needed
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiamFjb2Jpc2FhYyIsImEiOiJjbWkxY3h5d2owcDJjMm1yNG05cjFtaW16In0.togZH3hSr6Nf2QFmnNZY9A';
     const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [76.29, 9.98],
-        zoom: 12.5
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [76.29, 9.98],
+      zoom: 12.5
     });
 
+    // Fetch terminals and routes from your backend
     fetch('/api/live_map_data')
-        .then(resp => resp.json())
-        .then(data => {
-            // Add terminal markers (all green)
-            data.terminals.forEach(t => {
-                let el = document.createElement('div');
-                el.style.background = "green";
-                el.style.borderRadius = '50%';
-                el.style.width = '18px';
-                el.style.height = '18px';
-                el.style.border = '2px solid white';
-                el.style.boxShadow = '0 0 3px #333';
+      .then(resp => resp.json())
+      .then(data => {
+        // Add terminal markers
+        data.terminals.forEach(t => {
+          let el = document.createElement('div');
+          el.style.background = "green";
+          el.style.borderRadius = '50%';
+          el.style.width = '18px';
+          el.style.height = '18px';
+          el.style.border = '2px solid white';
+          el.style.boxShadow = '0 0 3px #333';
+          new mapboxgl.Marker(el)
+            .setLngLat([t.longitude, t.latitude])
+            .setPopup(new mapboxgl.Popup().setHTML(
+              `<b>${t.name || 'Terminal'}</b><br>
+              <b>Latitude:</b> ${t.latitude}<br>
+              <b>Longitude:</b> ${t.longitude}`
+            ))
+            .addTo(map);
+        });
 
-                new mapboxgl.Marker(el)
-                  .setLngLat([t.longitude, t.latitude])
-                  .setPopup(new mapboxgl.Popup().setHTML(
-                    `<b>${t.name}</b><br>
-                    <b>Latitude:</b> ${t.latitude}<br>
-                    <b>Longitude:</b> ${t.longitude}`
-                  ))
-                  .addTo(map);
-            });
-
-            // // Draw route lines
-            // data.routes.forEach(r => {
-            //     const orig = data.terminals.find(t => t.id === r.origin_terminal_id);
-            //     const dest = data.terminals.find(t => t.id === r.destination_terminal_id);
-            //     if (orig && dest) {
-            //         map.addSource(route-${orig.id}-${dest.id}, {
-            //             type: 'geojson',
-            //             data: {
-            //                 type: 'Feature',
-            //                 geometry: {
-            //                     type: 'LineString',
-            //                     coordinates: [
-            //                         [orig.longitude, orig.latitude],
-            //                         [dest.longitude, dest.latitude]
-            //                     ]
-            //                 }
-            //             }
-            //         });
-            //         map.addLayer({
-            //             id: route-${orig.id}-${dest.id},
-            //             type: 'line',
-            //             source: route-${orig.id}-${dest.id},
-            //             layout: { 'line-join': 'round', 'line-cap': 'round' },
-            //             paint: { 'line-color': '#0080ff', 'line-width': 3 }
-            //         });
-            //     }
-            // });
-            // Load official metro routes and points from your routes.geojson
-fetch('/static/routes.geojson')
-    .then(resp => resp.json())
-    .then(geojson => {
-        // All route paths (LineString features)
-        map.addSource('realroutes', {
-            type: 'geojson',
-            data: {
-                type: 'FeatureCollection',
-                features: geojson.features.filter(f => f.geometry.type === 'LineString')
+        // Search bar logic
+        document.getElementById('searchbar').addEventListener('keyup', function(e) {
+          if (e.key === 'Enter') {
+            const q = this.value.trim().toLowerCase();
+            const found = data.terminals.find(t => (t.name || "").toLowerCase().includes(q));
+            if (found) {
+              map.flyTo({center: [found.longitude, found.latitude], zoom: 13});
+            } else if (/^\s*([\d.]+)\s*,\s*([\d.]+)\s*$/.test(q)) {
+              const [_, lat, lng] = q.match(/([\d.]+)\s*,\s*([\d.]+)/);
+              map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: 13});
             }
+          }
+        });
+      });
+
+    // Load official route lines and animate boats from geojson
+    fetch('/static/routes.geojson')
+      .then(resp => resp.json())
+      .then(geojson => {
+        // Draw all route paths (LineString features)
+        map.addSource('realroutes', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: geojson.features.filter(f => f.geometry.type === 'LineString')
+          }
         });
         map.addLayer({
-            id: 'realroute-lines',
-            type: 'line',
-            source: 'realroutes',
-            layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: { 'line-color': '#0080ff', 'line-width': 3, 'line-dasharray': [2,2] }
+          id: 'realroute-lines',
+          type: 'line',
+          source: 'realroutes',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#0080ff', 'line-width': 3, 'line-dasharray': [2,2] }
         });
+
         // Helper for smooth interpolation
-function lerp(a, b, t) {
-    return [
-        a[0] + (b[0] - a[0]) * t,
-        a[1] + (b[1] - a[1]) * t
-    ];
-}
-
-function animateBoat(marker, coords, durationSeconds = 60) {
-    let segIndex = 0;
-    let t = 0;
-    let stepsPerSegment = 100;
-    let totalSegments = coords.length - 1;
-    let frameDuration = (durationSeconds * 1000) / (totalSegments * stepsPerSegment);
-
-    function move() {
-        if (segIndex >= totalSegments) {
-            segIndex = 0;
-            t = 0;
+        function lerp(a, b, t) {
+          return [
+            a[0] + (b[0] - a[0]) * t,
+            a[1] + (b[1] - a[1]) * t
+          ];
         }
-        let pos = lerp(coords[segIndex], coords[segIndex+1], t / stepsPerSegment);
-        marker.setLngLat(pos);
-        t++;
-        if (t >= stepsPerSegment) {
-            segIndex++;
-            t = 0;
+
+        function animateBoat(marker, coords, durationSeconds = 60) {
+          let segIndex = 0;
+          let t = 0;
+          let stepsPerSegment = 100;
+          let totalSegments = coords.length - 1;
+          let frameDuration = (durationSeconds * 1000) / (totalSegments * stepsPerSegment);
+
+          function move() {
+            if (segIndex >= totalSegments) {
+              segIndex = 0;
+              t = 0;
+            }
+            let pos = lerp(coords[segIndex], coords[segIndex+1], t / stepsPerSegment);
+            marker.setLngLat(pos);
+            t++;
+            if (t >= stepsPerSegment) {
+              segIndex++;
+              t = 0;
+            }
+            requestAnimationFrame(move);
+          }
+          move();
         }
-        requestAnimationFrame(move);
-    }
-    move();
-}
 
-// Add a boat for each route
-let routeLines = geojson.features.filter(f => f.geometry.type === "LineString");
-routeLines.forEach((route, idx) => {
-    let coords = route.geometry.coordinates;
-    let el = document.createElement('div');
-el.className = 'boat-marker';
-el.style.width = '32px';
-el.style.height = '32px';
-el.style.background = 'transparent';
-el.style.display = 'flex';
-el.style.justifyContent = 'center';
-el.style.alignItems = 'center';
-el.innerHTML = '<img src="/static/boat.png" width="30" height="30" style="display:block;" />';
-
-    let marker = new mapboxgl.Marker(el)
-        .setLngLat(coords[0])
-        .setPopup(new mapboxgl.Popup().setHTML(<b>Boat ${idx+1}</b>))
-        .addTo(map);
-    animateBoat(marker, coords, 60); // 60 seconds per full route
-});
-
-        // All terminal/waypoint points (markers)
-    //     geojson.features.filter(f => f.geometry.type === 'Point').forEach(f => {
-    //         let el = document.createElement('div');
-    //         el.style.background = "green";
-    //         el.style.borderRadius = '50%';
-    //         el.style.width = '18px';
-    //         el.style.height = '18px';
-    //         el.style.border = '2px solid white';
-    //         el.style.boxShadow = '0 0 3px #333';
-    //         new mapboxgl.Marker(el)
-    //             .setLngLat(f.geometry.coordinates)
-    //             .setPopup(new mapboxgl.Popup().setHTML(
-    //                 `<b>Terminal</b><br>
-    //                 Lat: ${f.geometry.coordinates[1]}<br>
-    //                 Lng: ${f.geometry.coordinates[0]}`))
-    //             .addTo(map);
-    //     });
-     });
-
-            // Search bar
-            document.getElementById('searchbar').addEventListener('keyup', function(e) {
-                if (e.key === 'Enter') {
-                    const q = this.value.trim().toLowerCase();
-                    const found = data.terminals.find(t => t.name.toLowerCase().includes(q));
-                    if (found) {
-                        map.flyTo({center: [found.longitude, found.latitude], zoom: 13});
-                    } else if (/^\s*([\d.]+)\s*,\s*([\d.]+)\s*$/.test(q)) {
-                        const [_, lat, lng] = q.match(/([\d.]+)\s*,\s*([\d.]+)/);
-                        map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: 13});
-                    }
-                }
-            });
+        // Add a boat for each route
+        let routeLines = geojson.features.filter(f => f.geometry.type === "LineString");
+        routeLines.forEach((route, idx) => {
+          let coords = route.geometry.coordinates;
+          let el = document.createElement('div');
+          el.className = 'boat-marker';
+          el.style.width = '32px';
+          el.style.height = '32px';
+          el.style.background = 'transparent';
+          el.style.display = 'flex';
+          el.style.justifyContent = 'center';
+          el.style.alignItems = 'center';
+          el.innerHTML = '<img src="/static/boat.png" width="30" height="30" style="display:block;" />';
+          let marker = new mapboxgl.Marker(el)
+            .setLngLat(coords[0])
+            .setPopup(new mapboxgl.Popup().setHTML(`<b>Boat ${idx+1}</b>`))
+            .addTo(map);
+          animateBoat(marker, coords, 60); // 60 seconds per route
         });
-</script>
+
+        // (Optional) Draw geojson Points as terminals if present
+        geojson.features.filter(f => f.geometry.type === 'Point').forEach(f => {
+          let el = document.createElement('div');
+          el.style.background = "green";
+          el.style.borderRadius = '50%';
+          el.style.width = '18px';
+          el.style.height = '18px';
+          el.style.border = '2px solid white';
+          el.style.boxShadow = '0 0 3px #333';
+          new mapboxgl.Marker(el)
+            .setLngLat(f.geometry.coordinates)
+            .setPopup(new mapboxgl.Popup().setHTML(
+              `<b>Terminal</b><br>
+              Lat: ${f.geometry.coordinates[1]}<br>
+              Lng: ${f.geometry.coordinates[0]}`
+            ))
+            .addTo(map);
+        });
+      });
+  </script>
 </body>
 </html>
