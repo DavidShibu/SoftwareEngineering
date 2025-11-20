@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="top-bar">
+    <h1>Permits & Certificates</h1>
+    <p style="color: #666;">Review and verify employee document uploads.</p>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Pending Review</h2>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa; text-align: left;">
+                    <th style="padding: 12px; border-bottom: 2px solid #eee;">Employee</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee;">Certificate</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee;">Type</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee;">Expiry</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee;">Status</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cert in certificates %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 600;">{{ cert.users.full_name if cert.users else 'Unknown' }}</div>
+                        <div style="font-size: 12px; color: #666;">{{ cert.users.employee_category if cert.users else '' }}</div>
+                    </td>
+                    <td style="padding: 12px;">
+                        {{ cert.certificate_name }}
+                        {% if cert.file_url %}
+                            <a href="{{ cert.file_url }}" target="_blank" style="display: block; font-size: 12px; color: #088395;">View PDF ↗</a>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 12px;">{{ cert.type }}</span>
+                    </td>
+                    <td style="padding: 12px;">
+                        {{ cert.expiry_date }}
+                    </td>
+                    <td style="padding: 12px;">
+                        {% if cert.status == 'Verified' %}
+                            <span style="color: #28a745; font-weight: bold;">Verified</span>
+                        {% elif cert.status == 'Rejected' %}
+                            <span style="color: #dc3545; font-weight: bold;">Denied</span>
+                        {% else %}
+                            <span style="color: #ffc107; font-weight: bold;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">
+                        {% if cert.status == 'pending' %}
+                        <form action="{{ url_for('admin_features_bp.verify_certificate', cert_id=cert.id) }}" method="POST" style="display: flex; gap: 5px;">
+                            <button type="submit" name="action" value="verify" class="btn-primary" style="padding: 6px 12px; font-size: 12px; background: #28a745;">Verify</button>
+                            <button type="submit" name="action" value="reject" class="btn-secondary" style="padding: 6px 12px; font-size: 12px; background: #dc3545; color: white; border: none;">Deny</button>
+                        </form>
+                        {% else %}
+                            <span style="font-size: 12px; color: #888;">Closed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="padding: 20px; text-align: center; color: #666;">No certificates found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

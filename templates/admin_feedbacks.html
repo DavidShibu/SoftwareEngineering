@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="top-bar">
+    <h1>Passenger Feedback</h1>
+    <p style="color: #666;">Read comments, complaints, and suggestions from passengers.</p>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="content-section">
+    <div class="stats-grid" style="grid-template-columns: 1fr;">
+        {% for feedback in feedbacks %}
+        <div class="stat-card" style="width: 100%; margin-bottom: 20px; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 10px;">
+                <h3 style="color: #0a4d68; font-size: 18px; margin: 0;">{{ feedback.subject }}</h3>
+                <span style="font-size: 12px; color: #888;">{{ feedback.submitted_at | datetime_format }}</span>
+            </div>
+            
+            <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">
+                From: {{ feedback.users.full_name if feedback.users else 'Anonymous' }} 
+                {% if feedback.users %}({{ feedback.users.email }}){% endif %}
+            </div>
+            
+            <div style="font-size: 15px; line-height: 1.6; color: #333; background: #f8f9fa; padding: 15px; border-radius: 8px; width: 100%; white-space: pre-wrap;">{{ feedback.message }}</div>
+
+            {% if feedback.attachments and feedback.attachments | length > 0 %}
+            <div style="margin-top: 10px;">
+                <strong style="font-size: 12px; color: #666;">Attachments:</strong>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
+                    {% for att in feedback.attachments %}
+                        <a href="{{ att.file_url }}" target="_blank" style="font-size: 13px; color: #088395; text-decoration: underline;">View File</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reply Section -->
+            <div style="width: 100%; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                <form action="{{ url_for('admin_features_bp.reply_feedback', feedback_id=feedback.id) }}" method="POST">
+                    <input type="hidden" name="original_message" value="{{ feedback.message }}">
+                    <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; display: block;">Reply to Feedback:</label>
+                    <textarea name="reply_text" rows="2" style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-family: inherit; font-size: 14px;" placeholder="Add an admin note or reply..." required></textarea>
+                    <div style="text-align: right; margin-top: 10px;">
+                        <button type="submit" class="btn-primary" style="padding: 8px 16px; font-size: 13px;">Post Reply</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        {% else %}
+            <p style="text-align: center; color: #666; padding: 40px;">No feedback received yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -79,23 +79,23 @@
                     <a href="#" class="nav-item">
                         <span>🏢</span> <span>Terminals</span>
                     </a>
-                    <!-- Link to Add Employee / View Employees -->
                     <a href="{{ url_for('add_employee_bp.add_employee_form') }}" class="nav-item {{ 'active' if request.endpoint == 'add_employee_bp.add_employee_form' }}">
                         <span>👥</span> <span>Employees</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('admin_features_bp.admin_certificates') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_certificates' }}">
                         <span>📄</span> <span>Permits & Certs</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('admin_features_bp.admin_incidents') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_incidents' }}">
                         <span>🚨</span> <span>Incidents</span>
                     </a>
-                    <a href="#" class="nav-item">
-                        <span>🔧</span> <span>Maintenance</span>
+                    <!-- CHANGED: Maintenance -> Complaints -->
+                    <a href="{{ url_for('admin_features_bp.admin_complaints') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_complaints' }}">
+                        <span>⚠️</span> <span>Complaints</span>
                     </a>
                     <a href="#" class="nav-item">
                         <span>🤖</span> <span>AI Insights</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('admin_features_bp.admin_feedbacks') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_features_bp.admin_feedbacks' }}">
                         <span>💬</span> <span>Feedback</span>
                     </a>
 
@@ -122,7 +122,7 @@
 
                 <!-- ================= PASSENGER MENU ================= -->
                 {% elif session.role == 'passenger' %}
-                    <a href="{{ url_for('passenger_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'passenger_dashboard' }}">
+                    <a href="{{ url_for('passenger_bp.passenger_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'passenger_bp.passenger_dashboard' }}">
                         <span>📊</span> <span>Dashboard</span>
                     </a>
                     <a href="#" class="nav-item">

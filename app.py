@@ -31,6 +31,9 @@ app.register_blueprint(passenger_bp, url_prefix='/passenger')
 
 from employee_features import employee_bp
 app.register_blueprint(employee_bp, url_prefix='/employee')
+from admin_features import admin_features_bp
+app.register_blueprint(admin_features_bp)
+
 
 # ---------------------------------
 # Root route

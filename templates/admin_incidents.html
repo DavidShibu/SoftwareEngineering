@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="top-bar">
+    <h1>Incident Management</h1>
+    <p style="color: #666;">Track, review, and assign safety incidents.</p>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Pending Review</h2>
+    </div>
+    
+    <!-- Using a responsive table layout similar to Certificates page -->
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa; text-align: left;">
+                    <th style="padding: 12px; border-bottom: 2px solid #eee; width: 20%;">Subject / Reporter</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee; width: 10%;">Severity</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee; width: 35%;">Narrative & Evidence</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee; width: 10%;">Status</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #eee; width: 25%;">Assign To</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for incident in incidents %}
+                <tr style="border-bottom: 1px solid #eee; vertical-align: top;">
+                    <!-- Subject & Reporter -->
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 600; color: #333;">{{ incident.subject }}</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                            {{ incident.users.full_name if incident.users else 'Unknown' }}
+                            <br>
+                            {{ incident.accident_time | datetime_format }}
+                        </div>
+                    </td>
+
+                    <!-- Severity -->
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;
+                            background: {% if incident.severity == 'Critical' %}#dc3545; color: white;{% elif incident.severity == 'Major' %}#fd7e14; color: white;{% else %}#fff3cd; color: #856404;{% endif %}">
+                            {{ incident.severity }}
+                        </span>
+                    </td>
+
+                    <!-- Narrative & File Link -->
+                    <td style="padding: 12px;">
+                        <div style="font-size: 13px; line-height: 1.5; color: #555; max-height: 100px; overflow-y: auto; margin-bottom: 8px;">
+                            {{ incident.narrative }}
+                        </div>
+                        {% if incident.file_url %}
+                            <a href="{{ incident.file_url }}" target="_blank" style="display: inline-flex; align-items: center; font-size: 12px; color: #088395; text-decoration: none; font-weight: 600;">
+                                <span style="margin-right: 4px;">📎</span> View Evidence ↗
+                            </a>
+                        {% endif %}
+                    </td>
+
+                    <!-- Status -->
+                    <td style="padding: 12px;">
+                        <span style="font-size: 12px; font-weight: 600; color: #666;">
+                            {{ incident.status }}
+                        </span>
+                    </td>
+
+                    <!-- Assign Form -->
+                    <td style="padding: 12px;">
+                        {% if incident.status != 'Closed' %}
+                        <form action="{{ url_for('admin_features_bp.assign_incident', incident_id=incident.id) }}" method="POST" style="display: flex; flex-direction: column; gap: 5px;">
+                            <input type="hidden" name="current_narrative" value="{{ incident.narrative }}">
+                            <input type="hidden" name="employee_name_hidden" id="name_hidden_{{ incident.id }}">
+                            
+                            <select name="assigned_to" style="padding: 6px; border-radius: 4px; border: 1px solid #ddd; font-size: 12px; width: 100%;" 
+                                    onchange="document.getElementById('name_hidden_{{ incident.id }}').value = this.options[this.selectedIndex].text" required>
+                                <option value="">-- Select Employee --</option>
+                                {% for emp in employees %}
+                                    <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            <button type="submit" class="btn-primary" style="padding: 6px 12px; font-size: 12px; width: 100%;">Assign Case</button>
+                        </form>
+                        {% else %}
+                            <span style="font-size: 12px; color: #28a745;">Case Closed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="padding: 20px; text-align: center; color: #666;">No incidents reported.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

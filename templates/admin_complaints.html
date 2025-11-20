@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="top-bar">
+    <h1>Passenger Complaints</h1>
+    <p style="color: #666;">Manage and resolve reported issues from passengers.</p>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="content-section">
+    <div class="stats-grid" style="grid-template-columns: 1fr;">
+        {% for complaint in complaints %}
+        <div class="stat-card" style="width: 100%; margin-bottom: 20px; align-items: flex-start;">
+            
+            <!-- Card Header -->
+            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 10px;">
+                <div>
+                    <h3 style="color: #0a4d68; font-size: 18px; margin: 0;">{{ complaint.subject }}</h3>
+                    <div style="font-size: 13px; color: #666; font-weight: 600; margin-top: 5px;">
+                        From: {{ complaint.users.full_name if complaint.users else 'Anonymous' }} 
+                        {% if complaint.users %}({{ complaint.users.email }}){% endif %}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 12px; color: #888; display: block; margin-bottom: 5px;">{{ complaint.submitted_at | datetime_format }}</span>
+                    
+                    <!-- Status Badge -->
+                    <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;
+                        background: {% if complaint.status == 'pending' %}#fff3cd; color: #856404;{% else %}#d4edda; color: #155724;{% endif %}">
+                        {{ complaint.status }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Complaint Message Body -->
+            <div style="font-size: 15px; line-height: 1.6; color: #333; background: #f8f9fa; padding: 15px; border-radius: 8px; width: 100%; white-space: pre-wrap; border: 1px solid #eee;">{{ complaint.message }}</div>
+
+            <!-- Attachments Section -->
+            {% if complaint.attachments and complaint.attachments | length > 0 %}
+            <div style="margin-top: 15px; width: 100%;">
+                <strong style="font-size: 12px; color: #666; display: block; margin-bottom: 5px;">Attached Evidence:</strong>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    {% for att in complaint.attachments %}
+                        <a href="{{ att.file_url }}" target="_blank" class="btn-secondary" style="font-size: 12px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px;">
+                            <span>📎</span> View File
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Admin Reply Form (Only if not resolved) -->
+            {% if complaint.status != 'Resolved' %}
+            <div style="width: 100%; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                <form action="{{ url_for('admin_features_bp.reply_complaint', complaint_id=complaint.id) }}" method="POST">
+                    <!-- Pass original message hidden so backend can append to it -->
+                    <input type="hidden" name="original_message" value="{{ complaint.message }}">
+                    
+                    <label style="font-size: 13px; font-weight: 600; color: #0a4d68; margin-bottom: 8px; display: block;">
+                        <span style="margin-right: 5px;">↪️</span> Write a Response:
+                    </label>
+                    
+                    <textarea name="reply_text" rows="3" 
+                              style="width: 100%; border: 1px solid #ccc; border-radius: 6px; padding: 10px; font-family: inherit; font-size: 14px; transition: border 0.3s;" 
+                              placeholder="Type your official response here..." required></textarea>
+                    
+                    <div style="text-align: right; margin-top: 10px;">
+                        <button type="submit" class="btn-primary" style="padding: 8px 20px; font-size: 14px;">Send Reply & Resolve</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+        </div>
+        {% else %}
+            <div style="text-align: center; padding: 50px; color: #888; border: 2px dashed #eee; border-radius: 12px;">
+                <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
+                <p>No complaints found. Good job!</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

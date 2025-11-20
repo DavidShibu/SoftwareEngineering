@@ -1,4 +1,7 @@
-flask
+Flask
 supabase
 python-dotenv
+python-dateutil
+PyMuPDF
+Werkzeug
 gunicorn
