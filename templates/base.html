@@ -76,9 +76,7 @@
                     <a href="{{ url_for('admin_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'admin_dashboard' }}">
                         <span>📊</span> <span>Dashboard</span>
                     </a>
-                    <a href="#" class="nav-item">
-                        <span>🏢</span> <span>Terminals</span>
-                    </a>
+                    
                     <a href="{{ url_for('add_employee_bp.add_employee_form') }}" class="nav-item {{ 'active' if request.endpoint == 'add_employee_bp.add_employee_form' }}">
                         <span>👥</span> <span>Employees</span>
                     </a>
@@ -110,9 +108,7 @@
                     <a href="{{ url_for('employee_bp.upload_certificate') }}" class="nav-item {{ 'active' if request.endpoint == 'employee_bp.upload_certificate' }}">
                         <span>📄</span> <span>Upload Certificate</span>
                     </a>
-                    <a href="#" class="nav-item">
-                        <span>🚨</span> <span>Trigger Emergency</span>
-                    </a>
+                    
                     <a href="{{ url_for('employee_bp.my_incidents') }}" class="nav-item {{ 'active' if request.endpoint == 'employee_bp.my_incidents' }}">
                         <span>📋</span> <span>My Incidents</span>
                     </a>
