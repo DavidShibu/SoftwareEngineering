@@ -186,17 +186,179 @@
             <h3>View Reports</h3>
         </div>
         
-        <div class="action-card">
+        <div class="action-card" onclick="showAIModal()" style="cursor: pointer;">
             <span class="icon">🤖</span>
             <h3>AI Recommendations</h3>
         </div>
         
-        <div class="action-card">
-            <span class="icon">🚨</span>
-            <h3>Emergency Alerts</h3>
-        </div>
     </div>
 </div>
+<script>
+function runAIAnalysis() {
+    var loc = document.getElementById('ai_location').value.trim();
+    if(!loc) { alert("Enter a location name!"); return; }
+
+    document.getElementById('ai_loader').style.display = 'block';
+    document.getElementById('ai_result').innerHTML = "";
+
+    fetch("/admin/ai_recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ location: loc })
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        document.getElementById('ai_loader').style.display = 'none';
+        if (data.error) {
+            document.getElementById('ai_result').innerHTML = "<div style='color:red'>" + data.error + "</div>";
+        } else {
+            document.getElementById('ai_result').innerHTML = aiRecommendationCard(data);
+        }
+    });
+}
+function aiRecommendationCard(reco) {
+    let riskColor = { "High": "#4caf50", "Medium": "#ff9800", "Low": "#e53935" }[reco.suitability] || "#888";
+    return `
+        <div style="background:#041f4a22;border-radius:16px;padding:24px;margin-top:16px">
+            <h3 style="color:#0a4d68;margin:0 0 10px 0">${reco.location || "-"}</h3>
+            <div style="display:inline-block;padding:7px 18px;background:${riskColor}22;color:${riskColor};border-radius:999px;font-weight:bold;">
+                Suitability: ${reco.suitability || "-"}
+            </div>
+            <div style="margin-top:21px;color:#1b2431;"><b>Pros:</b> <ul>${(reco.pros||[]).map(p=><li>${p}</li>).join('')}</ul></div>
+            <div style="color:#1b2431;"><b>Cons:</b> <ul>${(reco.cons||[]).map(c=><li>${c}</li>).join('')}</ul></div>
+            <div style="margin-top:17px; color:#085;">
+                <b>Recommendation:</b><br>
+                <span>${reco.finalRecommendation || "-"}</span>
+            </div>
+        </div>
+    `;
+}
+</script>
+<!-- AI Modal -->
+<div id="ai-modal" style="
+    display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;
+    background:rgba(24,36,46,0.18);align-items:center;justify-content:center;
+">
+  <div style="
+      background:white;
+      padding:24px 12px 18px 12px;
+      border-radius:18px;
+      max-width:560px;
+      width:97vw;
+      box-sizing:border-box;
+      box-shadow:0 10px 40px #0001;
+      max-height:95vh;
+      overflow-y:auto;
+      position:relative;
+      margin:auto;
+  ">
+
+    <!-- Close button (top right for modal) -->
+    <button onclick="hideAIModal()"
+        style="position:absolute;top:14px;right:22px;font-size:26px;background:none;border:none;cursor:pointer;color:#0a4d68;font-weight:700;">&times;</button>
+
+    <h2 style="color:#0a4d68;margin:6px 0 20px 0;padding:0;font-size:2rem;text-align:center;">
+        AI Terminal Suitability
+    </h2>
+
+    <input type="text" id="ai_location" placeholder="Enter location (e.g., Aluva)"
+        style="padding:13px 9px;width:93%;margin-bottom:14px;border-radius:8px;border:1.3px solid #ddd;display:block;margin:auto;" />
+    <button onclick="runAIAnalysis()"
+    style="
+        padding: 8px 24px;
+        border-radius: 8px;
+        background: linear-gradient(90deg,#088395,#05bfdb);
+        color: white;
+        font-weight: 600;
+        width: auto;
+        min-width: 120px;
+        font-size: 1rem;
+        margin: 0 auto 18px auto;
+        display: block;
+        box-shadow: 0 1px 4px #08839522;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    ">
+    Run Analysis
+</button>
+
+
+    <div id="ai_loader" style="margin:14px 0 12px 0; display:none;font-size:18px;text-align:center;">
+      Analyzing... <span class="loading-spinner"></span>
+    </div>
+
+    <!-- The result will be injected here -->
+    <div id="ai_result" style="margin-top: 8px;"></div>
+
+    <!-- Bottom close button (always visible after result) -->
+    <button onclick="hideAIModal()"
+      style="margin:16px auto 0 auto;display:block;background:#e0e0e0;color:#0a4d68;
+             border:none;border-radius:8px;padding:10px 32px;font-weight:600;font-size:1.1em;cursor:pointer;">
+      Close
+    </button>
+  </div>
+</div>
+
+
+<script>
+function showAIModal() {
+    document.getElementById('ai-modal').style.display='flex';
+    document.getElementById('ai_location').value = '';
+    document.getElementById('ai_result').innerHTML = ''
+}
+function hideAIModal() {
+    document.getElementById('ai-modal').style.display='none';
+}
+function runAIAnalysis() {
+    var loc = document.getElementById('ai_location').value.trim();
+    if(!loc) { alert("Enter a location name!"); return; }
+    document.getElementById('ai_loader').style.display = 'block';
+    document.getElementById('ai_result').innerHTML = "";
+    fetch("/admin/ai_recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ location: loc })
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        document.getElementById('ai_loader').style.display = 'none';
+        if (data.error) {
+            document.getElementById('ai_result').innerHTML = "<div style='color:red;word-break:break-all;'>" + data.error + "</div>";
+        } else {
+            document.getElementById('ai_result').innerHTML = aiRecommendationCard(data);
+        }
+    });
+}
+function aiRecommendationCard(data) {
+    let riskColor = { "High": "#4caf50", "Medium": "#ff9800", "Low": "#e53935" }[data.suitability] || "#888";
+    return `
+        <div style="background:#f5fcff;border-radius:20px;padding:30px 28px;max-width:480px;margin:30px auto 0 auto;">
+            <div style="font-size:1.5em;font-weight:700;color:#175d7b;margin-bottom:10px;">
+                ${data.location || "-"}
+            </div>
+            <div style="margin-bottom:20px;">
+                <span style="display:inline-block;padding:10px 26px;font-weight:700;background:${riskColor}22;color:${riskColor};border-radius:20px;font-size:1em;">
+                    Suitability: ${data.suitability || "-"}
+                </span>
+            </div>
+            ${data.description && data.description !== "(No information provided by AI)" ? 
+                <div style="margin-bottom:14px;color:#085;font-size:1em;"><b>Description:</b> ${data.description}</div> 
+                : ""}
+            ${data.reasoning && data.reasoning !== "(No information provided by AI)" ? 
+                <div style="margin-bottom:18px;color:#0b4263;font-size:1em;"><b>Reasoning:</b> ${data.reasoning}</div>
+                : ""}
+            <div style="margin-top:10px;font-weight:700;color:#097d4c;font-size:1.1em;">
+                Recommendation:
+            </div>
+            <div style="color:#097d4c;font-size:1.1em;">
+                ${data.finalRecommendation || "-"}
+            </div>
+        </div>
+    `;
+}
+
+</script>
 
 <!-- Recent Activity -->
 <div class="content-section">

@@ -374,35 +374,52 @@
             
             <div class="content-section">
                 <div class="section-header">
-                    <h2>My Tasks</h2>
-                    <a href="#" class="btn">View All</a>
+                    <h2>My Assigned Tasks</h2>
+                    <span style="font-size: 0.9em; color: #666;">{{ tasks|length }} Active</span>
                 </div>
                 
-                <ul class="task-list">
-                    <li class="task-item">
-                        <div>
-                            <div class="task-title">Complete safety inspection</div>
-                            <div class="task-date">Due: Today</div>
-                        </div>
-                        <span class="task-status status-pending">Pending</span>
-                    </li>
-                    
-                    <li class="task-item">
-                        <div>
-                            <div class="task-title">Submit monthly report</div>
-                            <div class="task-date">Due: Tomorrow</div>
-                        </div>
-                        <span class="task-status status-pending">Pending</span>
-                    </li>
-                    
-                    <li class="task-item">
-                        <div>
-                            <div class="task-title">Equipment maintenance check</div>
-                            <div class="task-date">Completed: Yesterday</div>
-                        </div>
-                        <span class="task-status status-completed">Completed</span>
-                    </li>
-                </ul>
+                {% if tasks %}
+                    <ul class="task-list">
+                        {% for task in tasks %}
+                            <li class="task-item" style="border-left: 4px solid {% if task.severity == 'Critical' %}#dc3545{% elif task.severity == 'Major' %}#fd7e14{% else %}#088395{% endif %};">
+                                <div style="flex: 1;">
+                                    <div class="task-title">{{ task.subject }}</div>
+                                    <div class="task-date">
+                                        Reported by: {{ task.users.full_name if task.users else 'Unknown' }} <br>
+                                        <span style="font-size: 0.9em;">📅 {{ task.accident_time | replace('T', ' ') }}</span>
+                                    </div>
+                                    
+                                    <div style="margin-top: 8px;">
+                                        {% if task.file_url %}
+                                            <a href="{{ task.file_url }}" target="_blank" style="font-size: 12px; color: #088395; text-decoration: none; margin-right: 10px;">
+                                                📎 View Evidence
+                                            </a>
+                                        {% endif %}
+                                        
+                                        </div>
+                                </div>
+
+                                <div style="text-align: right;">
+                                    <span class="task-status 
+                                        {% if task.status == 'Assigned' %}status-pending
+                                        {% elif task.status == 'In Progress' %}status-pending
+                                        {% else %}status-completed{% endif %}">
+                                        {{ task.status }}
+                                    </span>
+                                    <br>
+                                    <small style="font-size: 10px; color: #999; display: block; margin-top: 5px;">
+                                        Priority: {{ task.severity }}
+                                    </small>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div style="text-align: center; padding: 40px; color: #888;">
+                        <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
+                        <p>You have no pending tasks!</p>
+                    </div>
+                {% endif %}
             </div>
             
             <div class="content-section">

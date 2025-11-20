@@ -25,60 +25,35 @@
         .feedback-item p { color: #333; line-height: 1.6; }
         .feedback-item .date { font-size: 12px; color: #666; margin-top: 10px; }
         
+        /* --- NEW: Admin Reply Style --- */
+        .admin-reply {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e3f2fd; /* Light blue matching theme */
+            border-left: 4px solid #0a4d68;
+            border-radius: 4px;
+        }
+        .admin-reply strong { color: #0a4d68; display: block; margin-bottom: 5px; }
+        .reply-date { font-size: 0.85em; color: #666; margin-top: 5px; font-style: italic; }
+
         .flash { padding: 10px; border-radius: 8px; margin-bottom: 20px; }
         .flash.error { background: #f8d7da; color: #721c24; }
         .flash.success { background: #d4edda; color: #155724; }
 
-        /* --- NEW: Attachment Styles --- */
+        /* --- Attachment Styles --- */
         .attachments-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e0e0e0;
+            display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;
         }
         .attachment-item {
-            flex-basis: 120px;
-            text-decoration: none;
-            color: #333;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: all 0.3s;
+            flex-basis: 120px; text-decoration: none; color: #333; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; transition: all 0.3s;
         }
-        .attachment-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        .attachment-item img, .attachment-item video {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            display: block;
-        }
+        .attachment-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); transform: translateY(-2px); }
+        .attachment-item img, .attachment-item video { width: 100%; height: 100px; object-fit: cover; display: block; }
         .attachment-file {
-            width: 100%;
-            height: 100px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #f0f0f0;
-            padding: 10px;
-            text-align: center;
+            width: 100%; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f0f0f0; padding: 10px; text-align: center;
         }
-        .attachment-file-icon {
-            font-size: 32px;
-            color: #0a4d68;
-        }
-        .attachment-file-name {
-            font-size: 12px;
-            word-break: break-all;
-            line-height: 1.3;
-            margin-top: 5px;
-        }
-        /* --- END NEW STYLES --- */
+        .attachment-file-icon { font-size: 32px; color: #0a4d68; }
+        .attachment-file-name { font-size: 12px; word-break: break-all; line-height: 1.3; margin-top: 5px; }
 
     </style>
 </head>
@@ -112,10 +87,23 @@
                     {% for feedback in feedbacks %}
                         <li class="feedback-item">
                             <h3>{{ feedback.subject or 'No Subject' }}</h3>
-                            <p>{{ feedback.message }}</p>
+                            <p><strong>You:</strong> {{ feedback.message }}</p>
                             <div class="date">Submitted on: {{ feedback.submitted_at | format_datetime }}</div>
                             
-                            <!-- --- NEW: Attachment Loop --- -->
+                            {% if feedback.admin_reply %}
+                                <div class="admin-reply">
+                                    <strong>Admin Response:</strong>
+                                    <p>{{ feedback.admin_reply }}</p>
+                                    <div class="reply-date">
+                                        Replied on: 
+                                        {% if feedback.reply_at %}
+                                            {{ feedback.reply_at.replace('T', ' ')[:16] }}
+                                        {% else %}
+                                            Just now
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
                             {% if feedback.attachments %}
                                 <div class="attachments-gallery">
                                     {% for att in feedback.attachments %}
@@ -134,16 +122,14 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <!-- --- END Attachment Loop --- -->
-
-                        </li>
+                            </li>
                     {% endfor %}
                 </ul>
             {% else %}
                 <p style="color: #666; text-align: center; padding: 40px;">You have not submitted any feedback.</p>
             {% endif %}
 
-            <a href="{{ url_for('passenger_dashboard') }}" style="display: block; text-align: center; margin-top: 20px; color: #088395; text-decoration: none; font-weight: 600;">&larr; Back to Dashboard</a>
+            <a href="{{ url_for('passenger_bp.passenger_dashboard') }}" style="display: block; text-align: center; margin-top: 20px; color: #088395; text-decoration: none; font-weight: 600;">&larr; Back to Dashboard</a>
         </div>
     </div>
 </body>

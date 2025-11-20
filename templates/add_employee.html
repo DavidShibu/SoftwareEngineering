@@ -1,12 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    /* Add some specific table styles for this page */
+    .employee-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .employee-table th {
+        text-align: left;
+        padding: 12px;
+        background-color: #f8f9fa;
+        color: #0a4d68;
+        font-weight: 600;
+        border-bottom: 2px solid #eee;
+    }
+    .employee-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+    }
+    .employee-table tr:hover {
+        background-color: #f9f9f9;
+    }
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+    .badge-tech { background: #e3f2fd; color: #0d47a1; }
+    .badge-finance { background: #fff3e0; color: #e65100; }
+    .badge-driver { background: #e8f5e9; color: #1b5e20; }
+    .badge-default { background: #f5f5f5; color: #616161; }
+</style>
+
 <div class="top-bar">
-    <h1>Add New Employee</h1>
-    <p style="color: #666;">Register a new staff member to the system.</p>
+    <h1>Manage Staff</h1>
+    <p style="color: #666;">Register new staff and view existing employee directory.</p>
 </div>
 
-<!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
@@ -17,14 +52,13 @@
     {% endif %}
 {% endwith %}
 
-<div class="content-section" style="max-width: 800px; margin: 0 auto;">
+<div class="content-section" style="max-width: 1000px; margin: 0 auto;">
     <div class="section-header">
-        <h2>Employee Details</h2>
+        <h2>Add New Employee</h2>
     </div>
 
     <form method="POST" action="{{ url_for('add_employee_bp.add_employee_form') }}">
         
-        <!-- Personal Info Grid -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="form-group">
                 <label class="form-label">Full Name</label>
@@ -42,7 +76,6 @@
             <input type="tel" name="phone" class="form-control" placeholder="+1 234 567 8900" required>
         </div>
 
-        <!-- Role & Location Grid -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="form-group">
                 <label class="form-label">Job Category</label>
@@ -68,7 +101,6 @@
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-        <!-- Security Grid -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div class="form-group">
                 <label class="form-label">Password</label>
@@ -81,12 +113,65 @@
             </div>
         </div>
 
-        <!-- Actions -->
         <div style="margin-top: 30px; text-align: right;">
             <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">Cancel</a>
             <button type="submit" class="btn-primary">Create Employee Account</button>
         </div>
 
     </form>
+</div>
+
+<div class="content-section" style="max-width: 1000px; margin: 40px auto 0;">
+    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Current Employee Directory</h2>
+        <span style="font-size: 0.9em; color: #666;">Total: {{ employees|length }}</span>
+    </div>
+
+    <div style="overflow-x: auto;">
+<table class="employee-table">
+    <thead>
+        <tr>
+            <th style="width: 35%;">Name</th>
+            <th style="width: 35%;">Contact</th>
+            <th style="width: 30%;">Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if employees %}
+            {% for emp in employees %}
+            <tr>
+                <td>
+                    <strong>{{ emp.full_name }}</strong><br>
+                    <small style="color: #888;">Joined: {{ emp.created_at[:10] }}</small>
+                </td>
+
+                <td>
+                    <div>📧 {{ emp.email }}</div>
+                    <div style="margin-top: 4px; color: #666;">📞 {{ emp.phone or 'N/A' }}</div>
+                </td>
+
+                <td>
+                    {% if emp.employee_category == 'technical' %}
+                        <span class="badge badge-tech">Technical</span>
+                    {% elif emp.employee_category == 'finance' %}
+                        <span class="badge badge-finance">Finance</span>
+                    {% elif emp.employee_category == 'boat_driver' %}
+                        <span class="badge badge-driver">Driver</span>
+                    {% else %}
+                        <span class="badge badge-default">{{ emp.employee_category | replace('_', ' ') | title }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 30px; color: #666;">
+                    No employees found.
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+    </div>
 </div>
 {% endblock %}

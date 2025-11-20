@@ -62,8 +62,26 @@ employee_bp.app_template_filter('datetime_format')(format_datetime)
 @employee_bp.route('/dashboard')
 @login_required(role='employee')
 def employee_dashboard():
-    category = session.get('employee_category', 'non_technical') 
-    return render_template('er.html', category=category)
+    user_id = session.get('user_id')
+    category = session.get('employee_category')
+    
+    tasks = []
+    try:
+        # Fetch incidents assigned to this user that are NOT Closed
+        # We join 'users' to get the reporter's name if needed
+        response = supabase.table('accidents') \
+            .select('*, users:reported_by_id(full_name)') \
+            .eq('assigned_to_id', user_id) \
+            .neq('status', 'Closed') \
+            .order('accident_time', desc=True) \
+            .execute()
+            
+        tasks = response.data if response.data else []
+        
+    except Exception as e:
+        flash(f"Error loading tasks: {e}", "error")
+
+    return render_template('er.html', category=category, tasks=tasks)
 
 # ---------------------------------------------------------------------------------------------------
 ## Certificate Management
