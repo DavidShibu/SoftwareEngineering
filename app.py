@@ -166,6 +166,43 @@ def logout():
     return redirect(url_for('index'))
 
 
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        # 1. Basic Validation
+        if new_password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return redirect(url_for('forgot_password'))
+
+        # 2. Check if user exists
+        user_res = supabase.table('users').select('id').eq('email', email).execute()
+        
+        if not user_res.data:
+            flash("No account found with that email.", "error")
+            return redirect(url_for('forgot_password'))
+
+        try:
+            # 3. Update Password Directly
+            hashed_password = generate_password_hash(new_password)
+            
+           
+            supabase.table('users').update({'password': hashed_password}).eq('email', email).execute()
+
+            flash("Password updated successfully! You can now log in.", "success")
+            return redirect(url_for('login'))
+
+        except Exception as e:
+            flash(f"Error updating password: {str(e)}", "error")
+            return redirect(url_for('forgot_password'))
+
+    return render_template('forgot_password.html')
+
+
 @app.route('/profile')
 @login_required(role='any') 
 def profile():

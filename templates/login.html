@@ -199,6 +199,12 @@
                 <div class="form-group">
                     <label for="password">🔒 Password</label>
                     <input type="password" id="password" name="password" required placeholder="Enter your password">
+                    
+                    <div style="text-align: right; margin-top: 5px;">
+                        <a href="{{ url_for('forgot_password') }}" style="color: #088395; font-size: 14px; text-decoration: none;">
+                            Forgot Password?
+                        </a>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn-login">Sign In</button>
