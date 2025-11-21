@@ -9,7 +9,6 @@ import re
 
 from decorators import login_required
 
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
