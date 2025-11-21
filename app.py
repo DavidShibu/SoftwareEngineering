@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dateutil import parser
 import re
 
-# Import the new decorator
 from decorators import login_required
 
 # Load environment variables
