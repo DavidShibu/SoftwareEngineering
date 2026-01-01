@@ -10,7 +10,7 @@ from decorators import login_required
 
 employee_bp = Blueprint('employee_bp', __name__)
 
-# Re-create the Supabase client
+# Re-create the Supabase 
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
